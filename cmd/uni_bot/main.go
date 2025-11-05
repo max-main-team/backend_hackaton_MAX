@@ -10,10 +10,9 @@ import (
 	"syscall"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/vmkteam/embedlog"
-
 	config "github.com/ssokov/backend_hackaton-MAX/cfg"
 	"github.com/ssokov/backend_hackaton-MAX/pkg/app"
+	"github.com/vmkteam/embedlog"
 )
 
 var (

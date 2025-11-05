@@ -1,0 +1,15 @@
+[database]
+host = "localhost"
+port = 5432
+user = "mikhail"
+password = "passord"
+database = "postgres"
+sslmode = "disable"
+
+[server]
+host = "0.0.0.0"
+port = 8080
+is_devel = true
+
+[api_keys]
+telegram = "your-api-key"

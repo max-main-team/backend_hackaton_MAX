@@ -1,3 +1,3 @@
-SERVER_HOST - адресс сервера
-SERVER_USER - пользователь
-SERVER_SSH_KEY  -   приватный ключ
+#SERVER_HOST - адресс сервера
+#SERVER_USER - пользователь
+#SERVER_SSH_KEY  -   приватный ключ

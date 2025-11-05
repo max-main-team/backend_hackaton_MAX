@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
+
 	cfg "github.com/ssokov/backend_hackaton-MAX/cfg"
 	"github.com/ssokov/backend_hackaton-MAX/pkg/http"
 	"github.com/vmkteam/embedlog"

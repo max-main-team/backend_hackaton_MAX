@@ -39,21 +39,21 @@ type Config struct {
 var (
 	appConfig *AppConfig
 	loadOnce  sync.Once
-	loadErr   error
+	errLoad   error
 )
 
 func Load(path string) (Config, error) {
 	loadOnce.Do(func() {
 		var cfg AppConfig
-		if _, loadErr = toml.DecodeFile(path, &cfg); loadErr != nil {
-			loadErr = fmt.Errorf("failed to load config: %w", loadErr)
+		if _, errLoad = toml.DecodeFile(path, &cfg); errLoad != nil {
+			errLoad = fmt.Errorf("failed to load config: %w", errLoad)
 			return
 		}
 		appConfig = &cfg
 	})
 
-	if loadErr != nil {
-		return Config{}, loadErr
+	if errLoad != nil {
+		return Config{}, errLoad
 	}
 
 	cfg := Config{

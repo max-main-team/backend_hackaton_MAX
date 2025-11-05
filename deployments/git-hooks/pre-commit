@@ -4,6 +4,9 @@ echo "Running pre-commit hooks..."
 # Автоформатирование кода
 go fmt ./...
 
+gci write $(find . -name '*.go' -type f)
+
+
 # Проверка go.mod и go.sum
 go mod tidy
 if [ -n "$(git diff --exit-code go.mod go.sum)" ]; then

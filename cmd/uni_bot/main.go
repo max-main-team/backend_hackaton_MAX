@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"fmt"
-	"log/slog"
-
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/vmkteam/embedlog"
+
 	config "github.com/ssokov/backend_hackaton-MAX/cfg"
 	"github.com/ssokov/backend_hackaton-MAX/pkg/app"
-	"github.com/vmkteam/embedlog"
 )
 
 var (
@@ -90,7 +90,6 @@ func main() {
 	<-quit
 
 	sl.Print(ctx, "Application finished")
-
 }
 
 func exitOnError(err error) {

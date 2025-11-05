@@ -1,0 +1,21 @@
+#!/bin/sh
+echo "Running pre-commit hooks..."
+
+# Автоформатирование кода
+go fmt ./...
+
+# Проверка go.mod и go.sum
+go mod tidy
+if [ -n "$(git diff --exit-code go.mod go.sum)" ]; then
+  echo "❌ go.mod или go.sum неактуальны. Выполни 'go mod tidy'"
+  exit 1
+fi
+
+# Линтер
+golangci-lint run
+if [ $? -ne 0 ]; then
+  echo "❌ Линтер нашёл ошибки"
+  exit 1
+fi
+
+echo "✅ Всё ок!"

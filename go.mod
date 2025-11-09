@@ -1,4 +1,4 @@
-module github.com/ssokov/backend_hackaton-MAX
+module github.com/max-main-team/backend_hackaton_MAX
 
 go 1.25.1
 

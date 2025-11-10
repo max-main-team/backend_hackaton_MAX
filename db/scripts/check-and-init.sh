@@ -1,84 +1,55 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 set -euo pipefail
-
-# ---- Настройка --------------------------------------------------------------
-# Какие схемы и таблицы считаем «признаком инициализации»
-REQUIRED_SCHEMAS=("users")
-REQUIRED_TABLES=("users.max_users_data")
+set -x
 
 INIT_FILE="/migrations/000001_init_schema.up.sql"
+MARK_TABLE="users._init_done"
 
-# ---- Функции ----------------------------------------------------------------
-function wait_pg() {
-  echo "Waiting for Postgres at ${PGHOST}:${PGPORT}..."
-  until pg_isready -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d "${PGDATABASE}" >/dev/null 2>&1; do
-    sleep 1
-  done
-  echo "Postgres is ready."
-}
+echo "== Env =="
+echo "PGHOST=$PGHOST PGPORT=$PGPORT PGUSER=$PGUSER PGDATABASE=$PGDATABASE"
 
-function schema_exists() {
-  local schema="$1"
-  psql -qtAX -c "select 1 from information_schema.schemata where schema_name='${schema}' limit 1;" | grep -q '^1$'
-}
+echo "== Where am I =="
+pwd
+ls -la /
+ls -la /migrations || true
+ls -la /scripts || true
 
-function table_exists() {
-  local schema_table="$1"
-  # to_regclass возвращает NULL, если таблицы нет
-  psql -qtAX -c "select to_regclass('${schema_table}') is not null;" | grep -q '^t$'
-}
-
-# ---- Логика -----------------------------------------------------------------
-wait_pg
-
-missing=0
-
-# Проверка схем
-for s in "${REQUIRED_SCHEMAS[@]}"; do
-  if schema_exists "$s"; then
-    echo "✔ schema '${s}' exists"
-  else
-    echo "✖ schema '${s}' is missing"
-    missing=1
-  fi
+echo "== Wait for Postgres =="
+until pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" >/dev/null 2>&1; do
+  sleep 1
 done
+echo "Postgres is ready."
 
-# Проверка таблиц
-for t in "${REQUIRED_TABLES[@]}"; do
-  if table_exists "$t"; then
-    echo "✔ table '${t}' exists"
-  else
-    echo "✖ table '${t}' is missing"
-    missing=1
-  fi
-done
-
-if [[ "${missing}" -eq 0 ]]; then
-  echo "Nothing to do: all required schemas/tables exist."
+echo "== Check marker table =="
+if psql -qtAX -c "select to_regclass('$MARK_TABLE') is not null;" | grep -q '^t$'; then
+  echo "Marker table $MARK_TABLE exists. Nothing to do."
   exit 0
 fi
 
-# Применяем init-миграцию
-if [[ -f "${INIT_FILE}" ]]; then
-  echo "Applying ${INIT_FILE}..."
-  psql --set ON_ERROR_STOP=1 -f "${INIT_FILE}"
-  echo "Init migration applied successfully."
+echo "== Count user tables in users (exclude system) =="
+TABLES_COUNT=$(psql -qtAX -c "
+  select count(*)
+  from pg_catalog.pg_tables
+  where schemaname='users'
+    and tablename not like 'pg_%'
+    and tablename not like 'sql_%';
+")
+echo "User tables in users: $TABLES_COUNT"
+
+if [ "$TABLES_COUNT" -eq 0 ]; then
+  echo "No user tables -> applying INIT: $INIT_FILE"
+  if [ ! -f "$INIT_FILE" ]; then
+    echo "ERROR: $INIT_FILE not found!" >&2
+    exit 1
+  fi
+  psql --set ON_ERROR_STOP=1 -f "$INIT_FILE"
+
+  echo "Create marker so we don't re-run next time..."
+  psql -qtAX -c "create table if not exists $MARK_TABLE(id int primary key default 1);"
+  echo "Init applied."
 else
-  echo "ERROR: ${INIT_FILE} not found. Cannot initialize schema." >&2
-  exit 1
+  echo "Tables already exist -> skip init."
 fi
 
-# Доп. верификация после применения
-post_missing=0
-for s in "${REQUIRED_SCHEMAS[@]}"; do
-  schema_exists "$s" || post_missing=1
-done
-for t in "${REQUIRED_TABLES[@]}"; do
-  table_exists "$t" || post_missing=1
-done
-
-if [[ "${post_missing}" -eq 0 ]]; then
-  echo "Schema verified after init."
-else
-  echo "WARNING: Some schemas/tables still missing after init." >&2
-fi
+echo "== Verify some objects =="
+psql -c "\dt+"

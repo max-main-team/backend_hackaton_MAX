@@ -26,6 +26,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Compute safe image name
+        run: |
+          # взять имя репозитория: owner/repo
+          REPO="${GITHUB_REPOSITORY}"
+          # оставить только repo
+          REPO_NAME="${REPO##*/}"
+          
+          # привести к lowercase и заменить "_" → "-"
+          SAFE_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
+          
+          # сформировать полный путь к образу
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${SAFE_NAME}/app:latest"
+          
+          echo "IMAGE_NAME=$SAFE_NAME" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          
+          echo "Using image: $IMAGE"
+          
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 

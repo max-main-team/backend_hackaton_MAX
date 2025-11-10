@@ -1,1 +1,35 @@
-// todo
+name: backend
+services:
+  db:
+    image: postgres:17.5-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+        interval: 2s
+        timeout: 2s
+        retries: 30
+  db-init:
+    image: postgres:17.5-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGUSER: ${POSTGRES_USER}
+      PGDATABASE: ${POSTGRES_DB}
+      PGHOST: db
+      PGPORT: ${PG_PORT}:5432
+    volumes:
+      - ./db/migrations:/migrations:ro
+      - ./db/scripts:/scripts:ro
+    entrypoint: [ "/bin/bash", "/scripts/check-and-init.sh" ]
+volumes:
+  pg_data:

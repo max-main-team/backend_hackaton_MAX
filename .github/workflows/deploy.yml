@@ -14,9 +14,6 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
-      # repo в lower и с заменой '_' -> '-'
-      IMAGE_NAME: ${{ toLower(replace(github.repository, '_', '-')) }}/app
-      IMAGE: ghcr.io/${{ env.IMAGE_NAME }}:latest
       TARGET_DIR: /opt/backend
       SSH_HOST: ${{ secrets.SERVER_HOST }}
       SSH_USER: ${{ secrets.SERVER_USER }}
@@ -26,24 +23,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # === формируем безопасное имя образа GHCR (lowercase, '_' -> '-') ===
       - name: Compute safe image name
+        shell: bash
         run: |
-          # взять имя репозитория: owner/repo
-          REPO="${GITHUB_REPOSITORY}"
-          # оставить только repo
-          REPO_NAME="${REPO##*/}"
-          
-          # привести к lowercase и заменить "_" → "-"
-          SAFE_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
-          
-          # сформировать полный путь к образу
-          IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${SAFE_NAME}/app:latest"
-          
-          echo "IMAGE_NAME=$SAFE_NAME" >> $GITHUB_ENV
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-          
-          echo "Using image: $IMAGE"
-          
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"         # напр. backend_hackaton_MAX
+          OWNER_NAME="${GITHUB_REPOSITORY_OWNER}"      # напр. max-main-team
+
+          SAFE_NAME=$(echo "$REPO_NAME"  | tr '[:upper:]' '[:lower:]' | tr '_' '-')
+          OWNER_SAFE=$(echo "$OWNER_NAME" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_REPO="ghcr.io/${OWNER_SAFE}/${SAFE_NAME}/app"
+          echo "IMAGE=${IMAGE_REPO}:latest" >> "$GITHUB_ENV"
+          echo "IMAGE_SHA=${IMAGE_REPO}:${GITHUB_SHA}" >> "$GITHUB_ENV"
+
+          echo "Using IMAGE=${IMAGE}"
+          echo "Using IMAGE_SHA=${IMAGE_SHA}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -66,20 +61,15 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE }}
-            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_SHA }}
 
+      # Упаковываем нужные файлы для сервера (без .env)
       - name: Create deploy package
+        shell: bash
         run: |
           mkdir -p bundle
           cp docker-compose.yml bundle/
           if [ -d db ]; then cp -r db bundle/; fi
-          # соберём .env для compose (добавим IMAGE)
-          {
-            if [ -n "${{ secrets.ENV_FILE }}" ]; then
-              printf "%s\n" "${{ secrets.ENV_FILE }}"
-            fi
-            echo "IMAGE=${IMAGE}"
-          } > bundle/.env
           tar -czf bundle.tgz -C bundle .
 
       - name: Upload package via SCP
@@ -102,6 +92,11 @@ jobs:
             sudo mkdir -p "$TARGET_DIR"
             sudo tar -xzf /tmp/bundle.tgz -C "$TARGET_DIR"
             cd "$TARGET_DIR"
-            sudo docker compose pull --ignore-pull-failures
-            sudo docker compose up -d
+
+            # Если образ приватный и сервер ещё не залогинен в GHCR,
+            # раскомментируй две строки ниже и создай секрет GHCR_PAT с правом write:packages
+            # echo "${{ secrets.GHCR_PAT }}" | sudo docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            IMAGE="${IMAGE}" sudo -E docker compose pull --ignore-pull-failures
+            IMAGE="${IMAGE}" sudo -E docker compose up -d
             sudo docker compose ps

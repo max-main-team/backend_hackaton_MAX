@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
@@ -35,4 +36,49 @@ func (u *userRepository) GetUserByID(ctx context.Context, id int) (*models.User,
 	}
 
 	return &user, nil
+}
+
+func (u *userRepository) GetUserRolesByID(ctx context.Context, id int) (*models.UserRoles, error) {
+	var roles []string
+	query :=
+		`
+	SELECT 'admin' as role 
+	FROM personalities.administrations
+	WHERE max_user_id = $1
+	UNION 
+	SELECT 'teacher' as role 
+	FROM personalities.teachers 
+	WHERE max_user_id = $1
+	UNION
+	SELECT 'student' as role 
+	FROM personalities.students 
+	WHERE max_user_id = $1
+	`
+
+	rows, err := u.pool.Query(ctx, query, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed GetUserRolesByID from db. err: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var role string
+		if err := rows.Scan(&role); err != nil {
+			return nil, fmt.Errorf("failed GetUserRolesByID from db in scan. err: %w", err)
+		}
+		roles = append(roles, role)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed GetUserRolesByID during iteration. err: %w", err)
+	}
+
+	rolesCopy := make([]string, len(roles))
+	copy(rolesCopy, roles)
+
+	userRoles := models.UserRoles{
+		Roles: rolesCopy,
+	}
+
+	return &userRoles, nil
 }

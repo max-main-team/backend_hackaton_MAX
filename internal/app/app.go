@@ -29,6 +29,7 @@ type App struct {
 	jwtService  auth.JWTService
 	userHandler *handlers.UserHandler
 	authHandler *handlers.AuthHandler
+	uniHandler  *handlers.UniHandler
 }
 
 func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool) *App {
@@ -39,7 +40,7 @@ func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool
 		sl:      slogger,
 	}
 	a.initDependencies()
-	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService)
+	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService, a.uniHandler)
 	return a
 }
 
@@ -52,11 +53,12 @@ func (a *App) initDependencies() {
 	// init repositories
 	userRepo := repositories.NewUserRepository(a.db)
 	refreshRepo, _ := repositories.NewPostgresRefreshTokenRepo(a.db)
+	uniRepo := repositories.NewUniRepository(a.db)
 
 	// init services
 	userService := services.NewUserService(userRepo)
-
 	jwtService := auth.NewJWTService(a.cfg)
+	uniService := services.NewUniService(uniRepo)
 
 	// init handlers
 	a.userHandler = handlers.NewUserHandler(userService, a.sl)
@@ -66,6 +68,8 @@ func (a *App) initDependencies() {
 		refreshRepo,
 		a.cfg.APIKeys[api_key_bot],
 	)
+
+	a.uniHandler = handlers.NewUniHandler(uniService, a.sl)
 }
 func (a *App) Run(ctx context.Context) error {
 	addr := fmt.Sprintf("%s:%d", a.cfg.Server.Host, a.cfg.Server.Port)

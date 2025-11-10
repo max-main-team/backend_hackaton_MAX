@@ -10,7 +10,7 @@ import (
 	"github.com/vmkteam/embedlog"
 )
 
-func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService) *echo.Echo {
+func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService, uniHandler *handlers.UniHandler) *echo.Echo {
 	e := echo.New()
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -29,6 +29,17 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	protected := e.Group("")
 	protected.Use(jwtService.JWTMiddleware())
+	public := e.Group("")
 
+	// Public auth endpoints
+	public.POST("/auth/login", authHandler.Login)
+	public.POST("/auth/refresh", authHandler.Refresh)
+
+	// Protected auth endpoints (require valid access token)
+	protected.GET("/auth/checkToken", authHandler.CheckToken)
+
+	uni := protected.Group("/uni")
+
+	uni.GET("/info", uniHandler.GetUniInfo)
 	return e
 }

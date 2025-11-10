@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+COPY deployments/docker .
 
 RUN go build -o app ./cmd/uni_bot
 

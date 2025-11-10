@@ -3,8 +3,6 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY deployments/docker .
-
 RUN go build -o app ./cmd/uni_bot
 
 FROM golang:1.25-alpine

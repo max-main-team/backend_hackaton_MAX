@@ -3,33 +3,39 @@ services:
   db:
     image: postgres:17.5-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: max_superuser
+      POSTGRES_PASSWORD: max_superuser
+      POSTGRES_DB: max_app_universities
+    # если нужен доступ с хоста — оставь, иначе можно убрать и сделать internal-сеть
     ports:
-      - "${PG_PORT}:5432"
+      - "${PG_PORT:-5432}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-        test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-        interval: 2s
-        timeout: 2s
-        retries: 30
+      # ЭКРАНИРУЕМ $ -> $$, чтобы переменные подставились внутри контейнера
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
   db-init:
     image: postgres:17.5-alpine
     depends_on:
       db:
         condition: service_healthy
     environment:
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-      PGUSER: ${POSTGRES_USER}
-      PGDATABASE: ${POSTGRES_DB}
+      # значения дублируем явно, чтобы не зависеть от внешних env при деплое
+      PGPASSWORD: max_superuser
+      PGUSER: max_superuser
+      PGDATABASE: max_app_universities
       PGHOST: db
-      PGPORT: ${PG_PORT}:5432
+      PGPORT: 5432
     volumes:
       - ./db/migrations:/migrations:ro
       - ./db/scripts:/scripts:ro
-    entrypoint: [ "/bin/bash", "/scripts/check-and-init.sh" ]
+    # alpine -> без bash; если скрипт POSIX, используем /bin/sh
+    entrypoint: [ "/bin/sh", "/scripts/check-and-init.sh" ]
+
 volumes:
   pg_data:

@@ -25,14 +25,25 @@ type AppConfig struct {
 		Port    int    `toml:"port"`
 		IsDevel bool   `toml:"is_devel"`
 	} `toml:"server"`
+
+	AuthConfig struct {
+		JWTSecret       string `toml:"jwt_secret"`
+		JWTAccessExpiry int    `toml:"jwt_access_expiry"`
+	} `toml:"auth"`
 }
 
 type Config struct {
+	APIKeys map[string]string
+
 	Database DBConfig
 	Server   struct {
 		Host    string
 		Port    int
 		IsDevel bool
+	}
+	AuthConfig struct {
+		JWTSecret       string
+		JWTAccessExpiry int // in hours
 	}
 }
 
@@ -57,6 +68,7 @@ func Load(path string) (Config, error) {
 	}
 
 	cfg := Config{
+		APIKeys:  appConfig.APIKeys,
 		Database: appConfig.Database,
 		Server: struct {
 			Host    string
@@ -66,6 +78,13 @@ func Load(path string) (Config, error) {
 			Host:    appConfig.Server.Host,
 			Port:    appConfig.Server.Port,
 			IsDevel: appConfig.Server.IsDevel,
+		},
+		AuthConfig: struct {
+			JWTSecret       string
+			JWTAccessExpiry int
+		}{
+			JWTSecret:       appConfig.AuthConfig.JWTSecret,
+			JWTAccessExpiry: appConfig.AuthConfig.JWTAccessExpiry,
 		},
 	}
 

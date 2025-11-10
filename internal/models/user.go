@@ -1,7 +1,13 @@
 package models
 
 type User struct {
-	ID       int
-	Username string
-	Email    string
+	ID               int
+	FirstName        string
+	LastName         *string
+	UserName         *string
+	IsBot            bool
+	LastActivityTime int
+	Description      *string
+	AvatarUrl        *string
+	FullAvatarUrl    *string
 }

@@ -8,16 +8,31 @@ import (
 )
 
 type userRepository struct {
-	db *pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
-func NewUserRepository(db *pgxpool.Pool) UserRepository {
-	return &userRepository{db: db}
+func NewUserRepository(pool *pgxpool.Pool) UserRepository {
+	return &userRepository{pool: pool}
 }
 
-func (u *userRepository) GetUserById(ctx context.Context, id int) (*models.User, error) {
-	return &models.User{
-		ID:       1,
-		Username: "testuser",
-	}, nil
+func (u *userRepository) GetUserByID(ctx context.Context, id int) (*models.User, error) {
+	var user models.User
+	query := `SELECT id, first_name, last_name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url
+			  FROM users.max_users_data
+			  WHERE id = $1`
+	err := u.pool.QueryRow(ctx, query, id).Scan(user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.UserName,
+		&user.IsBot,
+		&user.LastActivityTime,
+		&user.Description,
+		&user.AvatarUrl,
+		&user.FullAvatarUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

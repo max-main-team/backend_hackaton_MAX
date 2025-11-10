@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	config "github.com/max-main-team/backend_hackaton_MAX/cfg"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/app"
-
 	"github.com/vmkteam/embedlog"
 )
 

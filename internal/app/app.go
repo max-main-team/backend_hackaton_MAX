@@ -11,7 +11,12 @@ import (
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http/handlers"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/repositories"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/services"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/services/auth"
 	"github.com/vmkteam/embedlog"
+)
+
+const (
+	api_key_bot = "max_bot"
 )
 
 type App struct {
@@ -21,7 +26,9 @@ type App struct {
 	db      *pgxpool.Pool
 	echo    *echo.Echo
 
+	jwtService  auth.JWTService
 	userHandler *handlers.UserHandler
+	authHandler *handlers.AuthHandler
 }
 
 func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool) *App {
@@ -32,8 +39,7 @@ func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool
 		sl:      slogger,
 	}
 	a.initDependencies()
-
-	a.echo = http.NewRouter(a.sl, a.userHandler)
+	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService)
 	return a
 }
 
@@ -45,13 +51,21 @@ func (a *App) initDependencies() {
 
 	// init repositories
 	userRepo := repositories.NewUserRepository(a.db)
+	refreshRepo, _ := repositories.NewPostgresRefreshTokenRepo(a.db)
 
 	// init services
 	userService := services.NewUserService(userRepo)
 
+	jwtService := auth.NewJWTService(a.cfg)
+
 	// init handlers
 	a.userHandler = handlers.NewUserHandler(userService, a.sl)
-
+	a.authHandler = handlers.NewAuthHandler(
+		jwtService,
+		userRepo,
+		refreshRepo,
+		a.cfg.APIKeys[api_key_bot],
+	)
 }
 func (a *App) Run(ctx context.Context) error {
 	addr := fmt.Sprintf("%s:%d", a.cfg.Server.Host, a.cfg.Server.Port)

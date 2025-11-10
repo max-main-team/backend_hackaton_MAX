@@ -16,5 +16,5 @@ func NewUserService(userRepo repositories.UserRepository) *UserService {
 }
 
 func (s *UserService) GetUser(ctx context.Context, id int) (*models.User, error) {
-	return s.userRepo.GetUserById(ctx, id)
+	return s.userRepo.GetUserByID(ctx, id)
 }

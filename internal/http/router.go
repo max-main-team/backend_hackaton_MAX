@@ -5,11 +5,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http/handlers"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/services/auth"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/vmkteam/embedlog"
 )
 
-func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler) *echo.Echo {
+func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService) *echo.Echo {
 	e := echo.New()
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -25,6 +26,9 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler) *echo.
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	protected := e.Group("")
+	protected.Use(jwtService.JWTMiddleware())
 
 	return e
 }

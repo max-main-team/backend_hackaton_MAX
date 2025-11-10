@@ -24,14 +24,12 @@ func NewUserHandler(service *services.UserService, logger embedlog.Logger) *User
 func (h *UserHandler) GetUserById(c echo.Context) error {
 
 	contextLogger := c.Get("logger").(embedlog.Logger)
-	
+
 	contextLogger.Print(context.Background(), "GetUserById called")
 
 	user, _ := h.userService.GetUser(context.Background(), 1)
 
 	return c.JSON(http.StatusOK, dto.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
+		ID: user.ID,
 	})
 }

@@ -1,0 +1,9 @@
+.git
+.idea
+.vscode
+**/*_test.go
+build/
+dist/
+tmp/
+node_modules/
+.env

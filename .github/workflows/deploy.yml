@@ -1,21 +1,23 @@
-#SERVER_HOST - адресс сервера
-#SERVER_USER - пользователь
-#SERVER_SSH_KEY  -   приватный ключ
 name: Deploy Backend
 
 on:
   push:
-    branches: ["main"]     # деплой при пуше в main
-  workflow_dispatch: {}    # ручной запуск
+    branches: ["main"]
+  workflow_dispatch: {}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     env:
       REGISTRY: ghcr.io
-      IMAGE: ghcr.io/${{ github.repository }}/app:latest
-      TARGET_DIR: /opt/backend              # где на сервере будет проект
+      # repo в lower и с заменой '_' -> '-'
+      IMAGE_NAME: ${{ toLower(replace(github.repository, '_', '-')) }}/app
+      IMAGE: ghcr.io/${{ env.IMAGE_NAME }}:latest
+      TARGET_DIR: /opt/backend
       SSH_HOST: ${{ secrets.SERVER_HOST }}
       SSH_USER: ${{ secrets.SERVER_USER }}
       SSH_KEY:  ${{ secrets.SERVER_SSH_KEY }}
@@ -24,7 +26,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ---- СБОРКА И PUSH ОБРАЗА ----
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -44,22 +45,24 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ env.IMAGE }}
+          tags: |
+            ${{ env.IMAGE }}
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # ---- ПАКЕТ ДЛЯ СЕРВЕРА ----
       - name: Create deploy package
         run: |
-          mkdir bundle
+          mkdir -p bundle
           cp docker-compose.yml bundle/
-          # папка db если есть
           if [ -d db ]; then cp -r db bundle/; fi
-          # .env если он хранится в Secrets
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            printf "%s" "${{ secrets.ENV_FILE }}" > bundle/.env
-          fi
+          # соберём .env для compose (добавим IMAGE)
+          {
+            if [ -n "${{ secrets.ENV_FILE }}" ]; then
+              printf "%s\n" "${{ secrets.ENV_FILE }}"
+            fi
+            echo "IMAGE=${IMAGE}"
+          } > bundle/.env
           tar -czf bundle.tgz -C bundle .
 
-      # ---- ЗАЛИВКА НА СЕРВЕР ----
       - name: Upload package via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -69,7 +72,6 @@ jobs:
           source: "bundle.tgz"
           target: "/tmp"
 
-      # ---- ЗАПУСК НА СЕРВЕРЕ ----
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -78,12 +80,9 @@ jobs:
           key: ${{ env.SSH_KEY }}
           script: |
             set -e
-            sudo mkdir -p $TARGET_DIR
-            sudo tar -xzf /tmp/bundle.tgz -C $TARGET_DIR
-
-            cd $TARGET_DIR
+            sudo mkdir -p "$TARGET_DIR"
+            sudo tar -xzf /tmp/bundle.tgz -C "$TARGET_DIR"
+            cd "$TARGET_DIR"
             sudo docker compose pull --ignore-pull-failures
             sudo docker compose up -d
-
             sudo docker compose ps
-

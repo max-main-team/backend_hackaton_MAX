@@ -87,16 +87,17 @@ jobs:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_KEY }}
+          script_stop: true
           script: |
             set -e
-            sudo mkdir -p "$TARGET_DIR"
-            sudo tar -xzf /tmp/bundle.tgz -C "$TARGET_DIR"
-            cd "$TARGET_DIR"
+            sudo mkdir -p "${{ env.TARGET_DIR }}"
+            sudo tar -xzf /tmp/bundle.tgz -C "${{ env.TARGET_DIR }}"
+            cd "${{ env.TARGET_DIR }}"
 
-            # Если образ приватный и сервер ещё не залогинен в GHCR,
-            # раскомментируй две строки ниже и создай секрет GHCR_PAT с правом write:packages
+            # при необходимости логин в GHCR:
             # echo "${{ secrets.GHCR_PAT }}" | sudo docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            IMAGE="${IMAGE}" sudo -E docker compose pull --ignore-pull-failures
-            IMAGE="${IMAGE}" sudo -E docker compose up -d
+            IMAGE="${{ env.IMAGE }}" sudo -E docker compose pull --ignore-pull-failures
+            IMAGE="${{ env.IMAGE }}" sudo -E docker compose up -d
             sudo docker compose ps
+      

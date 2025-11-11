@@ -1,9 +1,9 @@
 package dto
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	// User        User     `json:"user"`
-	UserRoles []string `json:"user_roles"`
+	AccessToken string   `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	User        User     `json:"user"`
+	UserRoles   []string `json:"user_roles"`
 }
 
 type WebAppInitData struct {

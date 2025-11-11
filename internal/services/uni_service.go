@@ -11,8 +11,8 @@ type UniService struct {
 	uniRepo repositories.UniRepository
 }
 
-func NewUniService(uniRepository repositories.UniRepository) *UniService {
-	return &UniService{uniRepo: uniRepository}
+func NewUniService(repo repositories.UniRepository) *UniService {
+	return &UniService{uniRepo: repo}
 }
 
 func (u *UniService) GetInfoAboutUni(ctx context.Context, id int) (*models.UniversitiesData, error) {

@@ -16,25 +16,42 @@ func NewFaculRepository(pool *pgxpool.Pool) FaculRepository {
 	return &faculRepository{pool: pool}
 }
 
-func (u *faculRepository) GetFaculByID(ctx context.Context, id int) (*models.UniversitiesData, error) {
-	var uniData models.UniversitiesData
+func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int) ([]models.Faculties, error) {
 
+	var faculties []models.Faculties
 	query := `
-        SELECT uc.name, uud.name, uud.short_name
-        FROM universities.universities_data AS uud
-        JOIN universities.cities AS uc ON uud.city_id = uc.id
+        SELECT uf.id, uf.name, uud.name
+
+        FROM universities.faculties AS uf
+
+
+        JOIN universities.universities_data AS uud
+
+		ON uf.university_id = uud.id
+
         WHERE uud.id = (
             SELECT university_id 
             FROM personalities.administrations
             WHERE max_user_id = $1
         )
     `
-
-	err := u.pool.QueryRow(ctx, query, id).Scan(&uniData.City, &uniData.Name, &uniData.ShortName)
-
+	rows, err := u.pool.Query(ctx, query, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed get info about uni. err: %v", err)
+		return nil, fmt.Errorf("failed GetFaculsByUserID from db. err: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var facul models.Faculties
+		if err := rows.Scan(&facul.ID, &facul.Name, &facul.UniversityName); err != nil {
+			return nil, fmt.Errorf("failed GetFaculsByUserID from db in scan. err: %w", err)
+		}
+		faculties = append(faculties, facul)
 	}
 
-	return &uniData, nil
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed GetFaculsByUserID during iteration. err: %w", err)
+	}
+
+	return faculties, nil
 }

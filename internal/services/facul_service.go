@@ -11,11 +11,16 @@ type FaculService struct {
 	faculRepo repositories.FaculRepository
 }
 
-func NewFaculService(uniRepository repositories.UniRepository) *FaculService {
-	return &FaculService{faculRepo: uniRepository}
+func NewFaculService(repo repositories.FaculRepository) *FaculService {
+	return &FaculService{faculRepo: repo}
 }
 
-func (u *FaculService) GetInfoAboutUni(ctx context.Context, id int) (*models.UniversitiesData, error) {
+func (u *FaculService) GetInfoAboutUni(ctx context.Context, id int) ([]models.Faculties, error) {
 
-	return nil, nil
+	faculties, err := u.faculRepo.GetFaculsByUserID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return faculties, nil
 }

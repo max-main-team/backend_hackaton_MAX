@@ -11,7 +11,7 @@ import (
 	"github.com/vmkteam/embedlog"
 )
 
-func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService, uniHandler *handlers.UniHandler) *echo.Echo {
+func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService, uniHandler *handlers.UniHandler, facultiesHandler *handlers.FaculHandler) *echo.Echo {
 	e := echo.New()
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -45,11 +45,10 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 
-	// admim := protected.Group("/admin")
+	admim := protected.Group("/admin")
 
-	// faculties
-	// faculties := admim.Group("/faculties")
-	// faculties.POST("", uniHandler.GetUniInfo)
+	faculties := admim.Group("/faculties")
+	faculties.POST("", facultiesHandler.GetFaculties)
 	// faculties.GET("")
 	// faculties.PUT("")
 	// faculties.DELETE("")

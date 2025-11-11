@@ -12,4 +12,4 @@ port = 8080
 is_devel = true
 
 [api_keys]
-telegram = "f9LHodD0cOIyz98ITFjUcX5GHZ4pLsbr4_HaXBreRQXRS8EE4Hw7P83m6c4u0mRN87oeWPwASNXGn95C1tNd
+max_bot = "f9LHodD0cOIyz98ITFjUcX5GHZ4pLsbr4_HaXBreRQXRS8EE4Hw7P83m6c4u0mRN87oeWPwASNXGn95C1tNd"

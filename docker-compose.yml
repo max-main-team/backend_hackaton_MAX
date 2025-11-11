@@ -37,5 +37,19 @@ services:
     # alpine -> без bash; если скрипт POSIX, используем /bin/sh
     entrypoint: [ "/bin/sh", "/scripts/check-and-init.sh" ]
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+
+
 volumes:
   pg_data:

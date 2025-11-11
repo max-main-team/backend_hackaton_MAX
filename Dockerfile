@@ -11,6 +11,7 @@ FROM golang:1.25-alpine
 WORKDIR /root/
 
 COPY --from=builder /app/app /root/app
+COPY --from=builder /app/cfg/config.toml ./cfg/config.toml
 
 EXPOSE 8080
 

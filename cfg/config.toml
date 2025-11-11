@@ -1,0 +1,15 @@
+[database]
+host = "db"
+port = 5432
+user = "max_superuser"
+password = "max_superuser"
+database = "max_app_universities"
+sslmode = "disable"
+
+[server]
+host = "0.0.0.0"
+port = 8080
+is_devel = true
+
+[api_keys]
+telegram = "f9LHodD0cOIyz98ITFjUcX5GHZ4pLsbr4_HaXBreRQXRS8EE4Hw7P83m6c4u0mRN87oeWPwASNXGn95C1tNd

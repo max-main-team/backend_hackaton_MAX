@@ -4,14 +4,23 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http/handlers"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/services/auth"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/vmkteam/embedlog"
 )
 
-func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService) *echo.Echo {
+func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService, uniHandler *handlers.UniHandler) *echo.Echo {
 	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"https://hackaton-max.vercel.app"},
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+		MaxAge:           86400,
+	}))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -29,6 +38,17 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	protected := e.Group("")
 	protected.Use(jwtService.JWTMiddleware())
+	public := e.Group("")
 
+	// Public auth endpoints
+	public.POST("/auth/login", authHandler.Login)
+	public.POST("/auth/refresh", authHandler.Refresh)
+
+	// Protected auth endpoints (require valid access token)
+	protected.GET("/auth/checkToken", authHandler.CheckToken)
+
+	uni := protected.Group("/uni")
+
+	uni.GET("/info", uniHandler.GetUniInfo)
 	return e
 }

@@ -1,11 +1,9 @@
 package dto
 
-type LoginRequest struct {
-	InitData string `json:"username" validate:"required,min=3" example:"admin"`
-	Password string `json:"password" validate:"required,min=8" example:"strongpassword"`
-}
 type LoginResponse struct {
-	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	AccessToken string   `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	User        User     `json:"user" validate:"required"`
+	UserRoles   []string `json:"user_roles"`
 }
 
 type WebAppInitData struct {
@@ -14,14 +12,7 @@ type WebAppInitData struct {
 	Hash       string `json:"hash" validate:"required" example:"abc123def456"`
 	StartParam string `json:"start_param" example:"start_parameter"`
 
-	User struct {
-		ID           int    `json:"id" validate:"required" example:"123456789"`
-		FirstName    string `json:"first_name" validate:"required" example:"John"`
-		LastName     string `json:"last_name" example:"Doe"`
-		Username     string `json:"username" example:"johndoe"`
-		LanguageCode string `json:"language_code" example:"ru"`
-		PhotoURL     string `json:"photo_url" example:"https://example.com/photo.jpg"`
-	} `json:"user" validate:"required"`
+	User `json:"user" validate:"required"`
 
 	Chat struct {
 		ID   int    `json:"id" validate:"required" example:"-1001234567890"`

@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	GetUserByID(ctx context.Context, id int) (*models.User, error)
+	GetUserRolesByID(ctx context.Context, id int) (*models.UserRoles, error)
 }
 
 type RefreshTokenRepository interface {
@@ -15,4 +16,8 @@ type RefreshTokenRepository interface {
 	Find(tokenString string) (*models.RefreshToken, error)
 	Delete(tokenString string) error
 	DeleteByUser(userID int) error
+}
+
+type UniRepository interface {
+	GetUniInfoByUserID(ctx context.Context, id int) (*models.UniversitiesData, error)
 }

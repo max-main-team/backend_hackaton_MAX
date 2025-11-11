@@ -38,7 +38,6 @@ func NewAuthHandler(
 	}
 }
 
-// ErrorResponse стандартный формат ошибки
 type ErrorResponse struct {
 	Message string `json:"message" example:"error description"`
 	Error   string `json:"error"`
@@ -63,7 +62,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid init data")
 	}
 
-	user, err := h.userRepo.GetUserByID(context.TODO(), req.User.ID)
+	user, err := h.userRepo.GetUserByID(context.TODO(), req.ID)
 	if err != nil {
 		log.Errorf("Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -100,8 +99,17 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		SameSite: http.SameSiteLaxMode,
 		Expires:  expires,
 	})
+
+	userRoles, err := h.userRepo.GetUserRolesByID(context.TODO(), user.ID)
+	if err != nil {
+		log.Errorf("ailed find user roled %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "failed find user roled")
+	}
+
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
+		User:        req.User,
+		UserRoles:   userRoles.Roles,
 	})
 }
 
@@ -179,109 +187,6 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 	})
 }
 
-// // CreateUser godoc
-// // @Summary Создание нового пользователя (только для администраторов)
-// // @Description Создаёт нового пользователя. Требуется авторизация и роль admin.
-// // @Tags users
-// // @Security ApiKeyAuth
-// // @Accept json
-// // @Produce json
-// // @Param user body RegisterRequest true "Данные пользователя"
-// // @Success 201 {object} map[string]string "Возвращает информацию о созданном пользователе (message, id)"
-// // @Failure 400 {object} ErrorResponse "Неверный формат запроса или неверная роль"
-// // @Failure 403 {object} ErrorResponse "Требуется права администратора"
-// // @Failure 409 {object} ErrorResponse "Имя пользователя уже занято"
-// // @Failure 500 {object} ErrorResponse "Ошибка сервера при создании пользователя"
-// // @Router /admin/users [post]
-// func (h *AuthHandler) CreateUser(c echo.Context) error {
-// 	// Проверка прав доступа
-
-// 	log.Println("CreateUser called")
-// 	log.Println("Context user:", c.Get("user"))
-// 	log.Println(c.Get("user").(*model.User).Role)
-// 	currentUser, ok := c.Get("user").(*model.User)
-// 	if !ok || currentUser.Role != "admin" {
-// 		return echo.NewHTTPError(http.StatusForbidden, "Admin access required")
-// 	}
-
-// 	var req RegisterRequest
-// 	if err := c.Bind(&req); err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request format")
-// 	}
-
-// 	if _, err := h.userRepo.FindByUsername(req.Username); err == nil {
-// 		return echo.NewHTTPError(http.StatusConflict, "Username already exists")
-// 	}
-
-// 	//VehicleType := get
-// 	val, err := strconv.Atoi(req.ThresholdValue)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid threshold value")
-// 	}
-// 	user := &model.User{
-// 		Username:       req.Username,
-// 		Password:       req.Password,
-// 		Role:           req.Role,
-// 		VehicleType:    req.VehicleType,
-// 		ThresholdValue: val,
-// 	}
-
-// 	log.Println("user to create:", user)
-// 	if err := user.HashPassword(); err != nil {
-// 		log.Printf("Password hashing error: %v", err)
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "User creation failed")
-// 	}
-
-// 	if err := h.userRepo.Create(user); err != nil {
-// 		log.Printf("User creation error: %v", err)
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "User creation failed")
-// 	}
-
-// 	return c.JSON(http.StatusCreated, map[string]string{
-// 		"message": "User created successfully",
-// 		"id":      user.ID,
-// 	})
-// }
-
-// // Logout godoc
-// // @Summary Выход из системы
-// // @Description Инвалидирует refresh token (по значению из cookie) и удаляет cookie на клиенте.
-// // @Tags auth
-// // @Accept json
-// // @Produce json
-// // @Success 200 {object} map[string]string "Возвращает пустой объект при успешном выходе"
-// // @Failure 400 {object} ErrorResponse "Не удалось прочитать cookie или токен неизвестен"
-// // @Failure 500 {object} ErrorResponse "Ошибка сервера при удалении токена"
-// // @Router /user/logout [post]
-// func (h *AuthHandler) Logout(c echo.Context) error {
-
-// 	cookie, err := c.Cookie("refresh_token")
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, "Logout cookie error")
-// 	}
-// 	value := cookie.Value
-// 	if _, err := h.refreshRepo.Find(value); err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to read cookie")
-// 	}
-
-// 	if err := h.refreshRepo.Delete(value); err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete cookie")
-// 	}
-// 	cookie = &http.Cookie{
-// 		Name:     "refresh_token",
-// 		Value:    "",
-// 		Path:     "/",
-// 		HttpOnly: true,
-// 		Secure:   secure,
-// 		SameSite: http.SameSiteLaxMode,
-// 		Expires:  time.Unix(0, 0),
-// 		MaxAge:   -1,
-// 	}
-// 	http.SetCookie(c.Response(), cookie)
-
-// 	return c.JSON(http.StatusOK, map[string]string{})
-// }
-
 type TokenCheckResponse struct {
 	AccessToken  any
 	RefreshToken any
@@ -318,6 +223,11 @@ func (h *AuthHandler) CheckToken(c echo.Context) error {
 		}
 	}
 
+	username := ""
+	if user.UserName != nil {
+		username = *user.UserName
+	}
+
 	response := TokenCheckResponse{
 		AccessToken: TokenStatus{
 			Valid: true,
@@ -326,7 +236,7 @@ func (h *AuthHandler) CheckToken(c echo.Context) error {
 			Valid: refreshValid,
 		},
 		User: UserInfo{
-			Username:  *user.UserName,
+			Username:  username,
 			FirstName: user.FirstName,
 			UserID:    user.ID,
 		},

@@ -26,11 +26,11 @@ type App struct {
 	db      *pgxpool.Pool
 	echo    *echo.Echo
 
-	jwtService     auth.JWTService
-	userHandler    *handlers.UserHandler
-	authHandler    *handlers.AuthHandler
-	uniHandler     *handlers.UniHandler
-	personsHandler *handlers.PersonalitiesHandler
+	jwtService       auth.JWTService
+	userHandler      *handlers.UserHandler
+	authHandler      *handlers.AuthHandler
+	uniHandler       *handlers.UniHandler
+	personsHandler   *handlers.PersonalitiesHandler
 	facultiesHandler *handlers.FaculHandler
 }
 

@@ -46,12 +46,13 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	})
 
 	protected := e.Group("")
-	protected.Use(jwtService.JWTMiddleware())
 
 	public := e.Group("")
 
 	public.POST("/auth/login", authHandler.Login)
 	public.POST("/auth/refresh", authHandler.Refresh)
+
+	protected.Use(jwtService.JWTMiddleware())
 
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 	protected.GET("/test", userHandler.GetUserById)
@@ -62,7 +63,6 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	uni := protected.Group("/uni")
 	uni.GET("/info", uniHandler.GetUniInfo)
-
 
 	persons := protected.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)

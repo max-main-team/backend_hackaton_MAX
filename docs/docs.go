@@ -112,8 +112,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API for Hackaton backend",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

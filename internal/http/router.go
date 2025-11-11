@@ -40,13 +40,12 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	public.POST("/auth/login", authHandler.Login)
 	public.POST("/auth/refresh", authHandler.Refresh)
 
-	protected := e.Group("")
+	protected := e.Group("api")
 	protected.Use(jwtService.JWTMiddleware())
 
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 	protected.GET("/test", userHandler.GetUserById)
 
-	
 	admim := protected.Group("/admin")
 	faculties := admim.Group("/faculties")
 	faculties.POST("", facultiesHandler.GetFaculties)

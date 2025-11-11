@@ -16,7 +16,7 @@ func NewFaculRepository(pool *pgxpool.Pool) FaculRepository {
 	return &faculRepository{pool: pool}
 }
 
-func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int) ([]models.Faculties, error) {
+func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int64) ([]models.Faculties, error) {
 
 	var faculties []models.Faculties
 	query := `

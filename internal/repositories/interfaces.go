@@ -8,8 +8,8 @@ import (
 )
 
 type UserRepository interface {
-	GetUserByID(ctx context.Context, id int) (*models.User, error)
-	GetUserRolesByID(ctx context.Context, id int) (*models.UserRoles, error)
+	GetUserByID(ctx context.Context, id int64) (*models.User, error)
+	GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error)
 }
 
 type RefreshTokenRepository interface {
@@ -20,7 +20,7 @@ type RefreshTokenRepository interface {
 }
 
 type UniRepository interface {
-	GetUniInfoByUserID(ctx context.Context, id int) (*models.UniversitiesData, error)
+	GetUniInfoByUserID(ctx context.Context, id int64) (*models.UniversitiesData, error)
 }
 
 type PersonalitiesRepository interface {
@@ -28,5 +28,5 @@ type PersonalitiesRepository interface {
 }
 
 type FaculRepository interface {
-	GetFaculsByUserID(ctx context.Context, id int) ([]models.Faculties, error)
+	GetFaculsByUserID(ctx context.Context, id int64) ([]models.Faculties, error)
 }

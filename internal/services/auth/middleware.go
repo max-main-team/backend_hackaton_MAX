@@ -43,9 +43,8 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 				log.Printf("[req %s] token parse failed: %v", reqID, err)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token: "+err.Error())
 			}
-
 			user := &models.User{
-				ID:               claims.ID,
+				ID:               int64(claims.ID),
 				FirstName:        claims.FirstName,
 				LastName:         &claims.LastName,
 				UserName:         &claims.UserName,

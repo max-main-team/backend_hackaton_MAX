@@ -104,7 +104,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	// Ищем пользователя в базе
 	log.Printf("Finding user in DB with ID: %d", userData.ID)
 
-	user, err := h.userRepo.GetUserByID(context.TODO(), userData.ID)
+	user, err := h.userRepo.GetUserByID(context.TODO(), int64(userData.ID))
 	if err != nil {
 		log.Errorf("Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -115,7 +115,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	// Генерируем токены
 	access, refresh, err := h.jwtService.GenerateTokenPair(
-		user.ID,
+		int(user.ID),
 		user.LastActivityTime,
 		user.FirstName,
 		user.LastName,
@@ -133,7 +133,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	expires := time.Now().Add(h.jwtService.RefreshExpiry())
 
 	rt := &models.RefreshToken{
-		UserID:    user.ID,
+		UserID:    int(user.ID),
 		Token:     refresh,
 		ExpiresAt: expires,
 		CreatedAt: time.Now(),
@@ -245,14 +245,14 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Refresh token delete error")
 	}
 
-	user, err := h.userRepo.GetUserByID(context.TODO(), rt.UserID)
+	user, err := h.userRepo.GetUserByID(context.TODO(), int64(rt.UserID))
 	if err != nil {
 		log.Errorf("User lookup error: %d", rt.UserID)
 		return echo.NewHTTPError(http.StatusInternalServerError, "System error")
 	}
 
 	access, refresh, err := h.jwtService.GenerateTokenPair(
-		user.ID,
+		int(user.ID),
 		user.LastActivityTime,
 		user.FirstName,
 		user.LastName,
@@ -271,7 +271,7 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 	uid := user.ID
 
 	newRT := &models.RefreshToken{
-		UserID:    uid,
+		UserID:    int(uid),
 		Token:     refresh,
 		ExpiresAt: expires,
 	}
@@ -323,7 +323,7 @@ func (h *AuthHandler) CheckToken(c echo.Context) error {
 		if err == nil {
 			refreshValid = storedToken.ExpiresAt.After(time.Now())
 			uid := user.ID
-			if storedToken.UserID != uid {
+			if storedToken.UserID != int(uid) {
 				refreshValid = false
 			}
 		}
@@ -344,7 +344,7 @@ func (h *AuthHandler) CheckToken(c echo.Context) error {
 		User: UserInfo{
 			Username:  username,
 			FirstName: user.FirstName,
-			UserID:    user.ID,
+			UserID:    int(user.ID),
 		},
 	}
 

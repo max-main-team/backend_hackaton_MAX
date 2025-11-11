@@ -16,7 +16,7 @@ func NewUniRepository(pool *pgxpool.Pool) UniRepository {
 	return &uniRepository{pool: pool}
 }
 
-func (u *uniRepository) GetUniInfoByUserID(ctx context.Context, id int) (*models.UniversitiesData, error) {
+func (u *uniRepository) GetUniInfoByUserID(ctx context.Context, id int64) (*models.UniversitiesData, error) {
 	var uniData models.UniversitiesData
 
 	query := `

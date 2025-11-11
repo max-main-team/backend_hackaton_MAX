@@ -15,7 +15,7 @@ func NewFaculService(repo repositories.FaculRepository) *FaculService {
 	return &FaculService{faculRepo: repo}
 }
 
-func (u *FaculService) GetInfoAboutUni(ctx context.Context, id int) ([]models.Faculties, error) {
+func (u *FaculService) GetInfoAboutUni(ctx context.Context, id int64) ([]models.Faculties, error) {
 
 	faculties, err := u.faculRepo.GetFaculsByUserID(ctx, id)
 	if err != nil {

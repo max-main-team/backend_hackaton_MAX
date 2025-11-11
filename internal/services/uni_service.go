@@ -15,7 +15,7 @@ func NewUniService(repo repositories.UniRepository) *UniService {
 	return &UniService{uniRepo: repo}
 }
 
-func (u *UniService) GetInfoAboutUni(ctx context.Context, id int) (*models.UniversitiesData, error) {
+func (u *UniService) GetInfoAboutUni(ctx context.Context, id int64) (*models.UniversitiesData, error) {
 
 	uniData, err := u.uniRepo.GetUniInfoByUserID(ctx, id)
 	if err != nil {

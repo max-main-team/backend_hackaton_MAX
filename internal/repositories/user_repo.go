@@ -16,7 +16,7 @@ func NewUserRepository(pool *pgxpool.Pool) UserRepository {
 	return &userRepository{pool: pool}
 }
 
-func (u *userRepository) GetUserByID(ctx context.Context, id int) (*models.User, error) {
+func (u *userRepository) GetUserByID(ctx context.Context, id int64) (*models.User, error) {
 	var user models.User
 	query := `SELECT id, first_name, last_name, username, is_bot, last_activity, description, avatar_url, full_avatar_url
 			  FROM users.max_users_data
@@ -39,7 +39,7 @@ func (u *userRepository) GetUserByID(ctx context.Context, id int) (*models.User,
 	return &user, nil
 }
 
-func (u *userRepository) GetUserRolesByID(ctx context.Context, id int) (*models.UserRoles, error) {
+func (u *userRepository) GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error) {
 	var roles []string
 	query :=
 		`

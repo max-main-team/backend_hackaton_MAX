@@ -12,7 +12,7 @@ import (
 	"github.com/vmkteam/embedlog"
 )
 
-func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService, uniHandler *handlers.UniHandler, facultiesHandler *handlers.FaculHandler) *echo.Echo {
+func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService auth.JWTService, uniHandler *handlers.UniHandler, personsHandler *handlers.PersonalitiesHandler, facultiesHandler *handlers.FaculHandler) *echo.Echo {
 	e := echo.New()
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -62,6 +62,10 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	uni := protected.Group("/uni")
 	uni.GET("/info", uniHandler.GetUniInfo)
+
+
+	persons := protected.Group("/personalities")
+	persons.POST("/access", personsHandler.RequestAccess)
 
 	return e
 }

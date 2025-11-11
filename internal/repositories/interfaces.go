@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
 )
 
 type UserRepository interface {
@@ -20,6 +21,10 @@ type RefreshTokenRepository interface {
 
 type UniRepository interface {
 	GetUniInfoByUserID(ctx context.Context, id int) (*models.UniversitiesData, error)
+}
+
+type PersonalitiesRepository interface {
+	RequestUniversityAccess(ctx context.Context, uniAccess personalities.UniversityAccess) error
 }
 
 type FaculRepository interface {

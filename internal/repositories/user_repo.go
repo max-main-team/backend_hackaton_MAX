@@ -21,7 +21,8 @@ func (u *userRepository) GetUserByID(ctx context.Context, id int) (*models.User,
 	query := `SELECT id, first_name, last_name, username, is_bot, last_activity, description, avatar_url, full_avatar_url
 			  FROM users.max_users_data
 			  WHERE id = $1`
-	err := u.pool.QueryRow(ctx, query, id).Scan(user.ID,
+	err := u.pool.QueryRow(ctx, query, id).Scan(
+		&user.ID,
 		&user.FirstName,
 		&user.LastName,
 		&user.UserName,

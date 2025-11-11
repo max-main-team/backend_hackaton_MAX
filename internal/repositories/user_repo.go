@@ -18,7 +18,7 @@ func NewUserRepository(pool *pgxpool.Pool) UserRepository {
 
 func (u *userRepository) GetUserByID(ctx context.Context, id int) (*models.User, error) {
 	var user models.User
-	query := `SELECT id, first_name, last_name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url
+	query := `SELECT id, first_name, last_name, username, is_bot, last_activity, description, avatar_url, full_avatar_url
 			  FROM users.max_users_data
 			  WHERE id = $1`
 	err := u.pool.QueryRow(ctx, query, id).Scan(user.ID,

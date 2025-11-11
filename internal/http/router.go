@@ -24,7 +24,11 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	}))
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"https://hackaton-max.vercel.app"},
+		AllowOrigins: []string{
+			"https://hackaton-max.vercel.app",
+			"https://msokovykh.ru",
+			"https://www.msokovykh.ru", // добавьте www
+		},
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,

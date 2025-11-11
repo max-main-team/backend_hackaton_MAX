@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"time"
 
@@ -48,8 +50,22 @@ type RefreshRequest struct {
 }
 
 func (h *AuthHandler) Login(c echo.Context) error {
-
 	log := c.Get("logger").(embedlog.Logger)
+
+	// Логируем ВЕСЬ запрос
+	log.Printf("=== FULL REQUEST ===")
+	log.Printf("Method: %s", c.Request().Method)
+	log.Printf("URL: %s", c.Request().URL.String())
+	log.Printf("Headers: %v", c.Request().Header)
+
+	// Тело запроса
+	body, _ := io.ReadAll(c.Request().Body)
+	log.Printf("Body: %s", string(body))
+
+	// Восстанавливаем body для дальнейшей обработки
+	c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
+
+	log.Printf("=== END REQUEST ===")
 
 	var req dto.WebAppInitData
 	if err := c.Bind(&req); err != nil {

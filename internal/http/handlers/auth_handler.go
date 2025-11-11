@@ -169,6 +169,8 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		PhotoURL:     NewString(userData.PhotoURL),
 	}
 
+	log.Printf("User %d logged in successfully", userData.ID)
+	log.Printf("AccessToken: %s", access)
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
 		User:        responseUser,

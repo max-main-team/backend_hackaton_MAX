@@ -20,7 +20,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 			`from=${remote_ip} ` +
 			`user_agent="${user_agent}" ` +
 			`error="${error}"` + "\n",
-		Output: os.Stdout, // или ваш logger
+		Output: os.Stdout,
 	}))
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -52,8 +52,6 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	public.POST("/auth/login", authHandler.Login)
 	public.POST("/auth/refresh", authHandler.Refresh)
-
-	protected.Use(jwtService.JWTMiddleware())
 
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 	protected.GET("/test", userHandler.GetUserById)

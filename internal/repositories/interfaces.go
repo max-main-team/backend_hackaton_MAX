@@ -21,3 +21,5 @@ type RefreshTokenRepository interface {
 type UniRepository interface {
 	GetUniInfoByUserID(ctx context.Context, id int) (*models.UniversitiesData, error)
 }
+
+type FaculRepository interface{}

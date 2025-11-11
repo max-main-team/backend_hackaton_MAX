@@ -36,7 +36,7 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 	roles, err := f.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
 	if err != nil {
 		log.Errorf("failde to get user roles. err: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "failde to get user roles")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failde to get user roles")
 	}
 
 	isAdmin := false
@@ -53,7 +53,7 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 	faculties, err := f.faculService.GetInfoAboutUni(context.TODO(), currentUser.ID)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "failed get faculties")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed get faculties")
 	}
 
 	// faculties

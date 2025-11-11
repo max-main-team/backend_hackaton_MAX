@@ -54,7 +54,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	var req dto.WebAppInitData
 	if err := c.Bind(&req); err != nil {
 		log.Errorf("Invalid format for WebAppInitData. err: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request format")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Invalid request format")
 	}
 
 	if !auth.ValidateInitData(&req, h.botToken) {
@@ -103,7 +103,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	userRoles, err := h.userRepo.GetUserRolesByID(context.TODO(), user.ID)
 	if err != nil {
 		log.Errorf("ailed find user roled %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "failed find user roled")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roled")
 	}
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{

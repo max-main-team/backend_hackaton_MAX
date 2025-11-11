@@ -31,6 +31,7 @@ type App struct {
 	authHandler    *handlers.AuthHandler
 	uniHandler     *handlers.UniHandler
 	personsHandler *handlers.PersonalitiesHandler
+	facultiesHandler *handlers.FaculHandler
 }
 
 func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool) *App {
@@ -41,7 +42,7 @@ func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool
 		sl:      slogger,
 	}
 	a.initDependencies()
-	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService, a.uniHandler, a.personsHandler)
+	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService, a.uniHandler, a.personsHandler, a.facultiesHandler)
 	return a
 }
 
@@ -56,11 +57,13 @@ func (a *App) initDependencies() {
 	refreshRepo, _ := repositories.NewPostgresRefreshTokenRepo(a.db)
 	uniRepo := repositories.NewUniRepository(a.db)
 	personsRepo := repositories.NewPersonalitiesRepo(a.db)
+	faculRepo := repositories.NewFaculRepository(a.db)
 
 	// init services
 	userService := services.NewUserService(userRepo)
 	jwtService := auth.NewJWTService(a.cfg)
 	uniService := services.NewUniService(uniRepo)
+	faculService := services.NewFaculService(faculRepo)
 	personService := services.NewPersonalitiesService(personsRepo)
 
 	// init handlers
@@ -75,6 +78,7 @@ func (a *App) initDependencies() {
 	a.uniHandler = handlers.NewUniHandler(uniService, a.sl)
 
 	a.personsHandler = handlers.NewPersonalitiesHandler(personService, a.sl)
+	a.facultiesHandler = handlers.NewFaculHandler(faculService, a.sl)
 }
 func (a *App) Run(ctx context.Context) error {
 	addr := fmt.Sprintf("%s:%d", a.cfg.Server.Host, a.cfg.Server.Port)

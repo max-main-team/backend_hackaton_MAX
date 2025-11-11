@@ -27,4 +27,6 @@ type PersonalitiesRepository interface {
 	RequestUniversityAccess(ctx context.Context, uniAccess personalities.UniversityAccess) error
 }
 
-type FaculRepository interface{}
+type FaculRepository interface {
+	GetFaculsByUserID(ctx context.Context, id int) ([]models.Faculties, error)
+}

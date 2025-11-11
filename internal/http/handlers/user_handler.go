@@ -27,7 +27,7 @@ func (h *UserHandler) GetUserById(c echo.Context) error {
 
 	contextLogger.Print(context.Background(), "GetUserById called")
 
-	user, _ := h.userService.GetUser(context.Background(), 1)
+	user, _ := h.userService.GetUser(context.TODO(), 1)
 
 	return c.JSON(http.StatusOK, dto.UserResponse{
 		ID: user.ID,

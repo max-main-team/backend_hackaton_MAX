@@ -37,7 +37,7 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "failed get info about uni")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed get info about uni")
 	}
 
 	return c.JSON(http.StatusOK, dto.UniInfoResponse{

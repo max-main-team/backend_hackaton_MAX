@@ -1,0 +1,96 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for Hackaton backend",
+        "title": "Hackaton API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/personalities/access": {
+            "post": {
+                "description": "Current authenticated user sends a request to get a role in a university (student/teacher/admin).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Request access to join a university",
+                "parameters": [
+                    {
+                        "description": "Access request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RequestAccessToUniversity"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "echo.HTTPError": {
+            "type": "object",
+            "properties": {
+                "message": {}
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RequestAccessToUniversity": {
+            "type": "object",
+            "properties": {
+                "role": {
+                    "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType"
+                },
+                "university_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType": {
+            "type": "string",
+            "enum": [
+                "student",
+                "teacher",
+                "administration"
+            ],
+            "x-enum-varnames": [
+                "Student",
+                "Teacher",
+                "Admin"
+            ]
+        }
+    }
+}

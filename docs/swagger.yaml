@@ -1,0 +1,65 @@
+basePath: /api/v1
+definitions:
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RequestAccessToUniversity:
+    properties:
+      role:
+        $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType'
+      university_id:
+        type: integer
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType:
+    enum:
+    - student
+    - teacher
+    - administration
+    type: string
+    x-enum-varnames:
+    - Student
+    - Teacher
+    - Admin
+info:
+  contact: {}
+  description: API for Hackaton backend
+  title: Hackaton API
+  version: "1.0"
+paths:
+  /personalities/access:
+    post:
+      consumes:
+      - application/json
+      description: Current authenticated user sends a request to get a role in a university
+        (student/teacher/admin).
+      parameters:
+      - description: Access request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RequestAccessToUniversity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Request access to join a university
+      tags:
+      - personalities
+swagger: "2.0"

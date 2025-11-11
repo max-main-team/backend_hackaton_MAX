@@ -150,14 +150,14 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")
 	}
 
-	responseUser := dto.User{
-		ID:           userData.ID,
-		FirstName:    userData.FirstName,
-		LastName:     userData.LastName,
-		Username:     NewString(userData.Username),
-		LanguageCode: userData.LanguageCode,
-		PhotoURL:     NewString(userData.PhotoURL),
-	}
+	// responseUser := dto.User{
+	// 	ID:           userData.ID,
+	// 	FirstName:    userData.FirstName,
+	// 	LastName:     userData.LastName,
+	// 	Username:     NewString(userData.Username),
+	// 	LanguageCode: userData.LanguageCode,
+	// 	PhotoURL:     NewString(userData.PhotoURL),
+	// }
 
 	log.Printf("User %d logged in successfully", userData.ID)
 	log.Printf("AccessToken: %s", access)
@@ -166,13 +166,13 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	log.Printf("return JSON: %v", c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
-		User:        responseUser,
-		UserRoles:   userRoles.Roles,
+		// User:        responseUser,
+		UserRoles: userRoles.Roles,
 	}))
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
-		User:        responseUser,
-		UserRoles:   userRoles.Roles,
+		// User:        responseUser,
+		UserRoles: userRoles.Roles,
 	})
 }
 

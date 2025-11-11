@@ -65,13 +65,13 @@ jobs:
 
       # Упаковываем нужные файлы для сервера (без .env)
       - name: Create deploy package
-        shell: bash
         run: |
-          mkdir -p bundle
-          cp docker-compose.yml bundle/
-          cp Dockerfile bundle/
-          if [ -d db ]; then cp -r db bundle/; fi
-          tar -czf bundle.tgz -C bundle .
+          set -e
+          tar -czf bundle.tgz \
+            --exclude .git \
+            --exclude .github \
+            --exclude bundle.tgz \
+            .
 
       - name: Upload package via SCP
         uses: appleboy/scp-action@v0.1.7

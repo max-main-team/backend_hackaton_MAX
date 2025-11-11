@@ -1339,6 +1339,17 @@ ALTER TABLE ONLY users.refresh_tokens
 ALTER TABLE ONLY users.refresh_tokens
     ADD CONSTRAINT refresh_tokens_max_user_data_id_fk FOREIGN KEY (max_user_id) REFERENCES users.max_users_data(id);
 
+CREATE TYPE ROLE_TYPE AS ENUM ('administration', 'student', 'teacher');
+
+CREATE TABLE users.persons_adds (
+                                    id BIGINT NOT NULL,
+                                    from_max_user_id BIGINT NOT NULL,
+                                    to_administration_id BIGINT NOT NULL,
+                                    role_type ROLE_TYPE NOT NULL,
+                                    UNIQUE (from_max_user_id, to_administration_id, role_type),
+                                    FOREIGN KEY (from_max_user_id) REFERENCES users.max_users_data(id),
+                                    FOREIGN KEY (to_administration_id) REFERENCES personalities.administrations(id)
+);
 --
 -- PostgreSQL database dump complete
 --

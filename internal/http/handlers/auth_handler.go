@@ -171,6 +171,9 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	log.Printf("User %d logged in successfully", userData.ID)
 	log.Printf("AccessToken: %s", access)
+
+	log.Printf("User Roles: %v", userRoles.Roles)
+
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
 		User:        responseUser,

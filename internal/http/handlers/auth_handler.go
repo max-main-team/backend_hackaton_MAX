@@ -1,11 +1,17 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
-	"io"
+	"fmt"
 	"net/http"
+	"net/url"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -58,27 +64,55 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	log.Printf("URL: %s", c.Request().URL.String())
 	log.Printf("Headers: %v", c.Request().Header)
 
-	// Тело запроса
-	body, _ := io.ReadAll(c.Request().Body)
-	log.Printf("Body: %s", string(body))
-
-	// Восстанавливаем body для дальнейшей обработки
-	c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
-
-	log.Printf("=== END REQUEST ===")
-
-	var req dto.WebAppInitData
-	if err := c.Bind(&req); err != nil {
-		log.Errorf("Invalid format for WebAppInitData. err: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Invalid request format")
+	// Парсим form-data
+	if err := c.Request().ParseForm(); err != nil {
+		log.Errorf("Failed to parse form: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid form data")
 	}
 
-	if !auth.ValidateInitData(&req, h.botToken) {
-		log.Errorf("Invalid WebAppInitData: %+v", req)
+	// Логируем form данные
+	log.Printf("Form data: %+v", c.Request().Form)
+	log.Printf("=== END REQUEST ===")
+
+	// Получаем данные из формы
+	authDate := c.Request().FormValue("auth_date")
+	// queryID := c.Request().FormValue("query_id")
+	hash := c.Request().FormValue("hash")
+	userStr := c.Request().FormValue("user")
+	// chatStr := c.Request().FormValue("chat")
+	// ip := c.Request().FormValue("ip")
+
+	// Валидируем обязательные поля
+	if authDate == "" || hash == "" {
+		log.Errorf("Missing required fields: auth_date=%s, hash=%s", authDate, hash)
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
+	}
+
+	// Парсим user JSON
+	var userData struct {
+		ID           int     `json:"id"`
+		FirstName    string  `json:"first_name"`
+		LastName     string  `json:"last_name"`
+		Username     *string `json:"username"`
+		LanguageCode string  `json:"language_code"`
+		PhotoURL     *string `json:"photo_url"`
+	}
+
+	if userStr != "" {
+		if err := json.Unmarshal([]byte(userStr), &userData); err != nil {
+			log.Errorf("Failed to unmarshal user data: %v", err)
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid user data format")
+		}
+	}
+
+	// Валидируем данные MAX Web App
+	if !h.validateMAXData(c.Request().Form, hash) {
+		log.Errorf("Invalid MAX WebApp data")
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid init data")
 	}
 
-	user, err := h.userRepo.GetUserByID(context.TODO(), req.ID)
+	// Ищем пользователя в базе
+	user, err := h.userRepo.GetUserByID(context.TODO(), userData.ID)
 	if err != nil {
 		log.Errorf("Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -87,17 +121,27 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find user. err: "+err.Error())
 	}
 
-	access, refresh, err := h.jwtService.GenerateTokenPair(user.ID, user.LastActivityTime, user.FirstName, user.LastName, user.UserName, user.Description, user.AvatarUrl, user.FullAvatarUrl, user.IsBot)
+	// Генерируем токены
+	access, refresh, err := h.jwtService.GenerateTokenPair(
+		user.ID,
+		user.LastActivityTime,
+		user.FirstName,
+		user.LastName,
+		user.UserName,
+		user.Description,
+		user.AvatarUrl,
+		user.FullAvatarUrl,
+		user.IsBot,
+	)
 	if err != nil {
 		log.Errorf("Token generation error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
+
 	expires := time.Now().Add(h.jwtService.RefreshExpiry())
 
-	uid := user.ID
-
 	rt := &models.RefreshToken{
-		UserID:    uid,
+		UserID:    user.ID,
 		Token:     refresh,
 		ExpiresAt: expires,
 		CreatedAt: time.Now(),
@@ -106,27 +150,81 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	if err := h.refreshRepo.Save(rt); err != nil {
 		log.Printf("Refresh token save error: %v", err)
 	}
+
 	c.SetCookie(&http.Cookie{
 		Name:     "refresh_token",
 		Value:    refresh,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   secure,
+		Secure:   secure, // убедитесь что secure правильно установлен
 		SameSite: http.SameSiteLaxMode,
 		Expires:  expires,
 	})
 
 	userRoles, err := h.userRepo.GetUserRolesByID(context.TODO(), user.ID)
 	if err != nil {
-		log.Errorf("ailed find user roled %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roled")
+		log.Errorf("Failed find user roles: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")
+	}
+
+	// Создаем ответ с данными пользователя
+	responseUser := dto.User{
+		ID:           userData.ID,
+		FirstName:    userData.FirstName,
+		LastName:     userData.LastName,
+		Username:     NewString(userData.Username),
+		LanguageCode: userData.LanguageCode,
+		PhotoURL:     NewString(userData.PhotoURL),
 	}
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
-		User:        req.User,
+		User:        responseUser,
 		UserRoles:   userRoles.Roles,
 	})
+}
+
+func NewString(str *string) string {
+	if str == nil {
+		return ""
+	}
+	return *str
+}
+
+// validateMAXData проверяет валидность данных MAX Web App
+func (h *AuthHandler) validateMAXData(form url.Values, receivedHash string) bool {
+	// Создаем data check string согласно спецификации MAX
+	var dataCheckStrings []string
+
+	for key, values := range form {
+		// Исключаем поле hash из проверки
+		if key == "hash" {
+			continue
+		}
+
+		if len(values) > 0 {
+			dataCheckStrings = append(dataCheckStrings, fmt.Sprintf("%s=%s", key, values[0]))
+		}
+	}
+
+	// Сортируем в алфавитном порядке
+	sort.Strings(dataCheckStrings)
+
+	// Объединяем с разделителем \n
+	dataCheckString := strings.Join(dataCheckStrings, "\n")
+
+	// Создаем secret_key: HMAC-SHA256("WebAppData", botToken)
+	mac := hmac.New(sha256.New, []byte("WebAppData"))
+	mac.Write([]byte(h.botToken))
+	secretKey := mac.Sum(nil)
+
+	// Вычисляем хеш: hex(HMAC-SHA256(secret_key, data_check_string))
+	mac = hmac.New(sha256.New, secretKey)
+	mac.Write([]byte(dataCheckString))
+	calculatedHash := hex.EncodeToString(mac.Sum(nil))
+
+	// Сравниваем хеши
+	return calculatedHash == receivedHash
 }
 
 func (h *AuthHandler) Refresh(c echo.Context) error {

@@ -162,13 +162,20 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	log.Printf("User %d logged in successfully", userData.ID)
 	log.Printf("AccessToken: %s", access)
 
-	log.Printf("User Roles: %v", userRoles.Roles)
-
-	log.Printf("return JSON: %v", c.JSON(http.StatusOK, dto.LoginResponse{
+	response := dto.LoginResponse{
 		AccessToken: access,
 		// User:        responseUser,
 		UserRoles: userRoles.Roles,
-	}))
+	}
+
+	// Логируем что будем отправлять
+	jsonBytes, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("❌ JSON marshal error: %v", err)
+	} else {
+		log.Printf("📤 Sending JSON: %s", string(jsonBytes))
+	}
+
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
 		// User:        responseUser,

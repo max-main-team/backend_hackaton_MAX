@@ -22,7 +22,7 @@ func NewPostgresRefreshTokenRepo(pool *pgxpool.Pool) (RefreshTokenRepository, er
 func (r *pgRefreshTokenRepo) Save(rt *models.RefreshToken) error {
 	ctx := context.Background()
 	const q = `
-        INSERT INTO users.refresh_tokens (user_id, token, expires_at)
+        INSERT INTO users.refresh_tokens (max_user_id, token, expires_at)
         VALUES ($1, $2, $3)
         RETURNING id, created_at
     `
@@ -33,7 +33,7 @@ func (r *pgRefreshTokenRepo) Save(rt *models.RefreshToken) error {
 func (r *pgRefreshTokenRepo) Find(token string) (*models.RefreshToken, error) {
 	ctx := context.Background()
 	const q = `
-        SELECT id, user_id, token, expires_at, created_at
+        SELECT id, max_user_id, token, expires_at, created_at
         FROM users.refresh_tokens
         WHERE token = $1
     `
@@ -65,7 +65,7 @@ func (r *pgRefreshTokenRepo) Delete(token string) error {
 
 func (r *pgRefreshTokenRepo) DeleteByUser(userID int) error {
 	ctx := context.Background()
-	const q = `DELETE FROM users.refresh_tokens WHERE user_id = $1`
+	const q = `DELETE FROM users.refresh_tokens WHERE max_user_id = $1`
 	_, err := r.pool.Exec(ctx, q, userID)
 	if err != nil {
 		return fmt.Errorf("DeleteByUser failed: %w", err)

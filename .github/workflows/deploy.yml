@@ -69,6 +69,7 @@ jobs:
         run: |
           mkdir -p bundle
           cp docker-compose.yml bundle/
+          cp Dockerfile bundle/
           if [ -d db ]; then cp -r db bundle/; fi
           tar -czf bundle.tgz -C bundle .
 

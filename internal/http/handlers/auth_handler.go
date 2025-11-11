@@ -58,21 +58,11 @@ type RefreshRequest struct {
 func (h *AuthHandler) Login(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
-	// Логируем ВЕСЬ запрос
-	log.Printf("=== FULL REQUEST ===")
-	log.Printf("Method: %s", c.Request().Method)
-	log.Printf("URL: %s", c.Request().URL.String())
-	log.Printf("Headers: %v", c.Request().Header)
-
 	// Парсим form-data
 	if err := c.Request().ParseForm(); err != nil {
 		log.Errorf("Failed to parse form: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid form data")
 	}
-
-	// Логируем form данные
-	log.Printf("Form data: %+v", c.Request().Form)
-	log.Printf("=== END REQUEST ===")
 
 	// Получаем данные из формы
 	authDate := c.Request().FormValue("auth_date")
@@ -112,6 +102,8 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	// Ищем пользователя в базе
+	log.Printf("Finding user in DB with ID: %d", userData.ID)
+
 	user, err := h.userRepo.GetUserByID(context.TODO(), userData.ID)
 	if err != nil {
 		log.Errorf("Failed find user in db. err: %v", err)

@@ -43,7 +43,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	})
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	e.GET("/test", userHandler.GetUserById)
+	// e.GET("/test", userHandler.GetUserById)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -59,7 +59,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	protected.Use(jwtService.JWTMiddleware())
 
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
-	protected.GET("/test", userHandler.GetUserById)
+	// protected.GET("/test", userHandler.GetUserById)
 
 	admim := protected.Group("/admin")
 	faculties := admim.Group("/faculties")

@@ -40,6 +40,7 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 			tokenString := parts[1]
 			claims, err := s.ParseToken(tokenString)
 			if err != nil {
+				log.Printf("!!!!!! TOKEN: %v", tokenString)
 				log.Printf("[req %s] token parse failed: %v", reqID, err)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token: "+err.Error())
 			}

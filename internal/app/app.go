@@ -61,7 +61,7 @@ func (a *App) initDependencies() {
 
 	// init services
 	userService := services.NewUserService(userRepo)
-	jwtService := auth.NewJWTService(a.cfg)
+	a.jwtService = auth.NewJWTService(a.cfg)
 	uniService := services.NewUniService(uniRepo)
 	faculService := services.NewFaculService(faculRepo)
 	personService := services.NewPersonalitiesService(personsRepo)
@@ -69,7 +69,7 @@ func (a *App) initDependencies() {
 	// init handlers
 	a.userHandler = handlers.NewUserHandler(userService, a.sl)
 	a.authHandler = handlers.NewAuthHandler(
-		jwtService,
+		a.jwtService,
 		userRepo,
 		refreshRepo,
 		a.cfg.APIKeys[api_key_bot],

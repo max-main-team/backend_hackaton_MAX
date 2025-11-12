@@ -79,6 +79,10 @@ func (a *App) initDependencies() {
 
 	a.personsHandler = handlers.NewPersonalitiesHandler(personService, a.sl)
 	a.facultiesHandler = handlers.NewFaculHandler(faculService, a.sl)
+
+	if a.jwtService == nil {
+		panic("jwt service is nil")
+	}
 }
 func (a *App) Run(ctx context.Context) error {
 	addr := fmt.Sprintf("%s:%d", a.cfg.Server.Host, a.cfg.Server.Port)

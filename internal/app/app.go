@@ -26,7 +26,7 @@ type App struct {
 	db      *pgxpool.Pool
 	echo    *echo.Echo
 
-	jwtService       auth.JWTService
+	jwtService       *auth.JWTService
 	userHandler      *handlers.UserHandler
 	authHandler      *handlers.AuthHandler
 	uniHandler       *handlers.UniHandler
@@ -42,7 +42,7 @@ func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool
 		sl:      slogger,
 	}
 	a.initDependencies()
-	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, &a.jwtService, a.uniHandler, a.personsHandler, a.facultiesHandler)
+	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService, a.uniHandler, a.personsHandler, a.facultiesHandler)
 	return a
 }
 

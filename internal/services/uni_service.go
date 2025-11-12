@@ -24,3 +24,13 @@ func (u *UniService) GetInfoAboutUni(ctx context.Context, id int64) (*models.Uni
 
 	return uniData, nil
 }
+
+func (u *UniService) GetAllUniversities(ctx context.Context) ([]models.UniversitiesData, error) {
+
+	universities, err := u.uniRepo.GetAllUniversities(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return universities, nil
+}

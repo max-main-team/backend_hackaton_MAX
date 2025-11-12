@@ -46,7 +46,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	// e.GET("/test", userHandler.GetUserById)
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		return c.String(http.StatusOK, "Костя лошара")
 	})
 
 	protected := e.Group("")
@@ -58,6 +58,10 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	protected.Use(jwtService.JWTMiddleware())
 
+	users := protected.Group("/user")
+
+	users.GET("/me", userHandler.GetUserInfo)
+
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 	// protected.GET("/test", userHandler.GetUserById)
 
@@ -65,8 +69,12 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	faculties := admim.Group("/faculties")
 	faculties.POST("", facultiesHandler.GetFaculties)
 
-	uni := protected.Group("/uni")
+	uni := protected.Group("/universities")
+
 	uni.GET("/info", uniHandler.GetUniInfo)
+
+	// get info about all universities
+	uni.GET("/", uniHandler.GetAllUniversities)
 
 	persons := protected.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)

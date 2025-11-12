@@ -47,3 +47,30 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 		City:      uniInfo.City,
 	})
 }
+
+func (u *UniHandler) GetAllUniversities(c echo.Context) error {
+
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "GetAllUniversities called")
+
+	universities, err := u.uniService.GetAllUniversities(context.TODO())
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed get all universities")
+	}
+
+	var response []dto.UniInfoResponse
+	for _, uni := range universities {
+		response = append(response, dto.UniInfoResponse{
+			ID:          uni.ID,
+			Name:        uni.Name,
+			City:        uni.City,
+			ShortName:   uni.ShortName,
+			SiteUrl:     NewString(uni.SiteUrl),
+			Description: NewString(uni.Description),
+		})
+	}
+
+	return c.JSON(http.StatusOK, response)
+}

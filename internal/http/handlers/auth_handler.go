@@ -114,7 +114,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 				log.Errorf("Failed to create new user. err: %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create new user")
 			}
-			
+
 			user.ID = int64(userData.ID)
 			user.FirstName = userData.FirstName
 			user.LastName = &userData.LastName

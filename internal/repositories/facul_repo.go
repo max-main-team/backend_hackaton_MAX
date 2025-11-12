@@ -24,7 +24,6 @@ func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int64) ([]mo
 
         FROM universities.faculties AS uf
 
-
         JOIN universities.universities_data AS uud
 
 		ON uf.university_id = uud.id

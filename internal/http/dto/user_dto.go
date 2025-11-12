@@ -14,3 +14,8 @@ type User struct {
 	LanguageCode string `json:"language_code" example:"ru"`
 	PhotoURL     string `json:"photo_url" example:"https://example.com/photo.jpg"`
 }
+
+type UserInfoResponse struct {
+	User      User     `json:"user"`
+	UserRoles []string `json:"user_roles"`
+}

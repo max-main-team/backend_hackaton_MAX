@@ -101,7 +101,8 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	if err != nil {
 		log.Errorf("Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
-			err := h.userRepo.CreateNewUser(context.TODO(), &models.User{
+
+			newUser := &models.User{
 				ID:            int64(userData.ID),
 				FirstName:     userData.FirstName,
 				LastName:      &userData.LastName,
@@ -109,20 +110,15 @@ func (h *AuthHandler) Login(c echo.Context) error {
 				IsBot:         false,
 				AvatarUrl:     userData.PhotoURL,
 				FullAvatarUrl: userData.PhotoURL,
-			})
+			}
+
+			err := h.userRepo.CreateNewUser(context.TODO(), newUser)
 			if err != nil {
 				log.Errorf("Failed to create new user. err: %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create new user")
 			}
-
-			user.ID = int64(userData.ID)
-			user.FirstName = userData.FirstName
-			user.LastName = &userData.LastName
-			user.UserName = userData.Username
-			user.IsBot = false
-			user.AvatarUrl = userData.PhotoURL
-			user.FullAvatarUrl = userData.PhotoURL
-
+			user = newUser
+			log.Printf("Created new user with ID: %d", user.ID)
 		}
 		return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find user. err: "+err.Error())
 	}

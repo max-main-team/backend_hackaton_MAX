@@ -31,6 +31,10 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 				log.Printf("[req %s] auth missing", reqID)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
 			}
+
+			log.Printf("??????????? inof: %v", authHeader)
+
+			
 			parts := strings.SplitN(authHeader, " ", 2)
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				log.Printf("[req %s] invalid auth format", reqID)

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/max-main-team/backend_hackaton_MAX/internal/http/dto"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/repositories"
 )
@@ -33,4 +34,13 @@ func (u *UniService) GetAllUniversities(ctx context.Context) ([]models.Universit
 	}
 
 	return universities, nil
+}
+
+func (u *UniService) CreateSemesters(ctx context.Context, id int64, periods []dto.SemesterPeriod) (*models.UniversitiesData, error) {
+	// err := u.uniRepo.CreateSemestersForUniversity(ctx, id, periods)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	return nil, nil
 }

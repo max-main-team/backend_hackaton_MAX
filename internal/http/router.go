@@ -73,6 +73,8 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	uni.GET("/info", uniHandler.GetUniInfo)
 
+	uni.POST("/semesters", uniHandler.CreateSemesters)
+
 	// get info about all universities
 	uni.GET("/", uniHandler.GetAllUniversities)
 
@@ -81,5 +83,3 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	return e
 }
-
-//POST(ы) от админа на добавление распы: семестры, предметы, ..  🍃🍃 (Миша)

@@ -23,7 +23,7 @@ import (
 	"github.com/vmkteam/embedlog"
 )
 
-var secure bool = false
+var secure bool = true
 
 type AuthHandler struct {
 	jwtService  *auth.JWTService

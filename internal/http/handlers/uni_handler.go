@@ -31,12 +31,14 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
+		log.Errorf("Authentication error")
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
 	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
 
 	if err != nil {
+		log.Errorf("failed get info about uni. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get info about uni")
 	}
 
@@ -73,4 +75,29 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+func (u *UniHandler) CreateSemesters(c echo.Context) error {
+
+	log := c.Get("logger").(embedlog.Logger)
+	var req dto.CreateSemestersRequest
+
+	if err := c.Bind(&req); err != nil {
+		log.Errorf("Invalid request format: %v ", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request format: "+err.Error())
+	}
+
+	log.Print(context.Background(), "CreateSemesters called")
+
+	// currentUser, ok := c.Get("user").(*models.User)
+	// if !ok {
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
+	// }
+
+	// err := u.uniService.CreateSemesters(context.TODO(), int64(req.ID),req.Periods)
+	// if err != nil {
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, "failed create semesters")
+	// }
+
+	return c.JSON(http.StatusOK, map[string]string{"status": "semesters created successfully"})
 }

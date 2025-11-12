@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -26,6 +27,12 @@ func (s *JWTService) RefreshExpiry() time.Duration {
 	return s.Expiry * 24
 }
 func NewJWTService(cfg config.Config) *JWTService {
+
+	if cfg.AuthConfig.JWTSecret == "" {
+		log.Fatal("JWT secret is empty! Check your config file")
+	}
+	log.Printf("JWTService created with secret length: %d", len(cfg.AuthConfig.JWTSecret))
+
 	return &JWTService{
 		secret: []byte(cfg.AuthConfig.JWTSecret),
 		Expiry: time.Duration(cfg.AuthConfig.JWTAccessExpiry) * time.Hour,

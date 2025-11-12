@@ -693,7 +693,7 @@ CREATE TABLE users.max_users_data (
     last_name character varying(50),
     username text,
     is_bot boolean DEFAULT false NOT NULL,
-    last_activity bigint NOT NULL,
+    last_activity bigint,
     description character varying(16000),
     avatar_url text,
     full_avatar_url text

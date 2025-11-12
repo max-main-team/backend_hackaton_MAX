@@ -107,7 +107,7 @@ func (u *userRepository) GetUserRolesByID(ctx context.Context, id int64) (*model
 }
 
 func toNullString(s *string) interface{} {
-	if *s == "" {
+	if s == nil || *s == "" {
 		return nil
 	}
 	return s

@@ -67,7 +67,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	admim := protected.Group("/admin")
 	faculties := admim.Group("/faculties")
-	faculties.POST("", facultiesHandler.GetFaculties)
+	faculties.GET("", facultiesHandler.GetFaculties)
 
 	uni := protected.Group("/universities")
 
@@ -81,3 +81,5 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	return e
 }
+
+//POST(ы) от админа на добавление распы: семестры, предметы, ..  🍃🍃 (Миша)

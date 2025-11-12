@@ -22,7 +22,7 @@ func (u *UserService) GetUser(ctx context.Context, id int64) (*models.User, erro
 func (u *UserService) GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error) {
 
 	roles, err := u.userRepo.GetUserRolesByID(ctx, id)
-	if roles != nil {
+	if err != nil {
 		return nil, err
 	}
 	return roles, nil

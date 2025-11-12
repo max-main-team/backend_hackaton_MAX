@@ -74,12 +74,11 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	var userData struct {
-		ID           int     `json:"id"`
-		FirstName    string  `json:"first_name"`
-		LastName     string  `json:"last_name"`
-		Username     *string `json:"username"`
-		LanguageCode string  `json:"language_code"`
-		PhotoURL     *string `json:"photo_url"`
+		ID        int     `json:"id"`
+		FirstName string  `json:"first_name"`
+		LastName  string  `json:"last_name"`
+		Username  *string `json:"username"`
+		PhotoURL  *string `json:"photo_url"`
 	}
 
 	if userStr != "" {
@@ -96,11 +95,34 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	log.Printf("Finding user in DB with ID: %d", userData.ID)
 
+	var user *models.User
+
 	user, err := h.userRepo.GetUserByID(context.TODO(), int64(userData.ID))
 	if err != nil {
 		log.Errorf("Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusUnauthorized, "User not found")
+			err := h.userRepo.CreateNewUser(context.TODO(), &models.User{
+				ID:            int64(userData.ID),
+				FirstName:     userData.FirstName,
+				LastName:      &userData.LastName,
+				UserName:      userData.Username,
+				IsBot:         false,
+				AvatarUrl:     userData.PhotoURL,
+				FullAvatarUrl: userData.PhotoURL,
+			})
+			if err != nil {
+				log.Errorf("Failed to create new user. err: %v", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create new user")
+			}
+			
+			user.ID = int64(userData.ID)
+			user.FirstName = userData.FirstName
+			user.LastName = &userData.LastName
+			user.UserName = userData.Username
+			user.IsBot = false
+			user.AvatarUrl = userData.PhotoURL
+			user.FullAvatarUrl = userData.PhotoURL
+
 		}
 		return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find user. err: "+err.Error())
 	}
@@ -151,12 +173,11 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	responseUser := dto.User{
-		ID:           userData.ID,
-		FirstName:    userData.FirstName,
-		LastName:     userData.LastName,
-		Username:     NewString(userData.Username),
-		LanguageCode: userData.LanguageCode,
-		PhotoURL:     NewString(userData.PhotoURL),
+		ID:        userData.ID,
+		FirstName: userData.FirstName,
+		LastName:  userData.LastName,
+		Username:  NewString(userData.Username),
+		PhotoURL:  NewString(userData.PhotoURL),
 	}
 
 	log.Printf("User %d logged in successfully", userData.ID)
@@ -165,7 +186,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	response := dto.LoginResponse{
 		AccessToken: access,
 		User:        responseUser,
-		UserRoles: userRoles.Roles,
+		UserRoles:   userRoles.Roles,
 	}
 
 	// Логируем что будем отправлять

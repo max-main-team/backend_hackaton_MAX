@@ -27,3 +27,7 @@ func (u *UserService) GetUserRolesByID(ctx context.Context, id int64) (*models.U
 	}
 	return roles, nil
 }
+
+func (u *UserService) CreateNewUser(ctx context.Context, user *models.User) error {
+	return u.userRepo.CreateNewUser(ctx, user)
+}

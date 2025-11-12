@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	GetUserByID(ctx context.Context, id int64) (*models.User, error)
 	GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error)
+	CreateNewUser(ctx context.Context, user *models.User) error
 }
 
 type RefreshTokenRepository interface {

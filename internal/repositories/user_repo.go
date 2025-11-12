@@ -39,6 +39,28 @@ func (u *userRepository) GetUserByID(ctx context.Context, id int64) (*models.Use
 	return &user, nil
 }
 
+func (u *userRepository) CreateNewUser(ctx context.Context, user *models.User) error {
+	query := `INSERT INTO users.max_users_data (id, first_name, last_name, username, is_bot, last_activity, description, avatar_url, full_avatar_url)
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
+	_, err := u.pool.Exec(ctx, query,
+		user.ID,
+		user.FirstName,
+		toNullString(user.LastName),
+		toNullString(user.UserName),
+		user.IsBot,
+		user.LastActivityTime,
+		toNullString(user.Description),
+		toNullString(user.AvatarUrl),
+		toNullString(user.FullAvatarUrl))
+
+	if err != nil {
+		return fmt.Errorf("failed to create new user: %w", err)
+	}
+
+	return nil
+}
+
 func (u *userRepository) GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error) {
 	var roles []string
 	query :=
@@ -82,4 +104,11 @@ func (u *userRepository) GetUserRolesByID(ctx context.Context, id int64) (*model
 	}
 
 	return &userRoles, nil
+}
+
+func toNullString(s *string) interface{} {
+	if *s == "" {
+		return nil
+	}
+	return s
 }

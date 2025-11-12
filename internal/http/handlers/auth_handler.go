@@ -158,7 +158,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 		Expires:  expires,
 	})
 
@@ -303,7 +303,7 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 		Expires:  expires,
 	})
 	return c.JSON(http.StatusOK, dto.LoginResponse{

@@ -27,12 +27,28 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 		AllowOrigins: []string{
 			"https://hackaton-max.vercel.app",
 			"https://msokovykh.ru",
-			"https://www.msokovykh.ru", // добавьте www
+			"https://www.msokovykh.ru",
 		},
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodDelete,
+			http.MethodOptions,
+			http.MethodPatch,
+		},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+			echo.HeaderXRequestedWith,
+			"X-Requested-With",
+		},
+		AllowCredentials: true, // ✅ Уже есть - хорошо!
 		MaxAge:           86400,
+		// Добавь для надежности:
+		ExposeHeaders: []string{"Set-Cookie"},
 	}))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {

@@ -59,7 +59,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
 	if err := c.Request().ParseForm(); err != nil {
-		log.Errorf("Failed to parse form: %v", err)
+		log.Errorf("[Login] Failed to parse form: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid form data")
 	}
 
@@ -69,7 +69,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	userStr := c.Request().FormValue("user")
 
 	if authDate == "" || hash == "" {
-		log.Errorf("Missing required fields: auth_date=%s, hash=%s", authDate, hash)
+		log.Errorf("[Login] Missing required fields: auth_date=%s, hash=%s", authDate, hash)
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
 	}
 
@@ -83,23 +83,21 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	if userStr != "" {
 		if err := json.Unmarshal([]byte(userStr), &userData); err != nil {
-			log.Errorf("Failed to unmarshal user data: %v", err)
+			log.Errorf("[Login] Failed to unmarshal user data: %v", err)
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid user data format")
 		}
 	}
 
 	if !h.validateMAXData(c.Request().Form, hash) {
-		log.Errorf("Invalid MAX WebApp data")
+		log.Errorf("[Login] Invalid MAX WebApp data")
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid init data")
 	}
-
-	log.Printf("Finding user in DB with ID: %d", userData.ID)
 
 	var user *models.User
 
 	user, err := h.userRepo.GetUserByID(context.TODO(), int64(userData.ID))
 	if err != nil {
-		log.Errorf("Failed find user in db. err: %v", err)
+		log.Errorf("[Login] Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
 
 			newUser := &models.User{
@@ -114,11 +112,11 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 			err := h.userRepo.CreateNewUser(context.TODO(), newUser)
 			if err != nil {
-				log.Errorf("Failed to create new user. err: %v", err)
+				log.Errorf("[Login] Failed to create new user. err: %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create new user")
 			}
 			user = newUser
-			log.Printf("Created new user with ID: %d", user.ID)
+			log.Printf("[Login] Created new user with ID: %d", user.ID)
 		}
 		return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find user. err: "+err.Error())
 	}
@@ -135,7 +133,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		user.IsBot,
 	)
 	if err != nil {
-		log.Errorf("Token generation error: %v", err)
+		log.Errorf("[Login] Token generation error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
@@ -149,7 +147,8 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	if err := h.refreshRepo.Save(rt); err != nil {
-		log.Printf("Refresh token save error: %v", err)
+		log.Printf("[Login] Refresh token save error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
 	c.SetCookie(&http.Cookie{
@@ -164,7 +163,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	userRoles, err := h.userRepo.GetUserRolesByID(context.TODO(), user.ID)
 	if err != nil {
-		log.Errorf("Failed find user roles: %v", err)
+		log.Errorf("[Login] Failed find user roles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")
 	}
 
@@ -176,22 +175,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		PhotoURL:  NewString(userData.PhotoURL),
 	}
 
-	log.Printf("User %d logged in successfully", userData.ID)
-	log.Printf("AccessToken: %s", access)
-
-	response := dto.LoginResponse{
-		AccessToken: access,
-		User:        responseUser,
-		UserRoles:   userRoles.Roles,
-	}
-
-	// Логируем что будем отправлять
-	jsonBytes, err := json.Marshal(response)
-	if err != nil {
-		log.Printf("❌ JSON marshal error: %v", err)
-	} else {
-		log.Printf("📤 Sending JSON: %s", string(jsonBytes))
-	}
+	log.Printf("[Login] User id: %d, name: %v logged in successfully. AccessToken: %v  ", userData.ID, userData.FirstName, access)
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AccessToken: access,
@@ -243,29 +227,29 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 
 	cookie, err := c.Cookie("refresh_token")
 	if err != nil {
-		log.Errorf("Refresh cookie error. err: %v", err)
+		log.Errorf("[Refresh] Refresh cookie error. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Refresh cookie error")
 	}
 	refreshRaw := cookie.Value
 	rt, err := h.refreshRepo.Find(refreshRaw)
 	if err != nil {
-		log.Errorf("Invalid refresh token: %v", err)
+		log.Errorf("[Refresh] Invalid refresh token: %v", err)
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid refresh token")
 	}
 
 	if rt.ExpiresAt.Before(time.Now()) {
-		log.Errorf("Expired refresh token. err: %v", err)
+		log.Errorf("[Refresh] Expired refresh token. err: %v", err)
 		return echo.NewHTTPError(http.StatusUnauthorized, "Expired refresh token")
 	}
 
 	if err := h.refreshRepo.Delete(refreshRaw); err != nil {
-		log.Errorf("Refresh token delete error: %v", err)
+		log.Errorf("[Refresh] Refresh token delete error: %v", err)
 		return echo.NewHTTPError(http.StatusUnauthorized, "Refresh token delete error")
 	}
 
 	user, err := h.userRepo.GetUserByID(context.TODO(), int64(rt.UserID))
 	if err != nil {
-		log.Errorf("User lookup error: %d", rt.UserID)
+		log.Errorf("[Refresh] User lookup error: %d", rt.UserID)
 		return echo.NewHTTPError(http.StatusInternalServerError, "System error")
 	}
 
@@ -281,7 +265,7 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 		user.IsBot,
 	)
 	if err != nil {
-		log.Errorf("Token generation error: %v", err)
+		log.Errorf("[Refresh] Token generation error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
@@ -295,7 +279,8 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 	}
 
 	if err := h.refreshRepo.Save(newRT); err != nil {
-		log.Printf("Refresh token save error: %v", err)
+		log.Printf("[Refresh] Refresh token save error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 	c.SetCookie(&http.Cookie{
 		Name:     "refresh_token",
@@ -328,8 +313,12 @@ type UserInfo struct {
 }
 
 func (h *AuthHandler) CheckToken(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "CheckToken called")
 	user := auth.GetUserFromContext(c)
 	if user == nil {
+		log.Printf("User not found in context")
 		return c.JSON(http.StatusUnauthorized, ErrorResponse{
 			Message: "Invalid or expired access token",
 		})

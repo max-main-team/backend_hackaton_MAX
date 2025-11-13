@@ -30,13 +30,14 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
+		log.Errorf("[GetFaculties] Authentication error. user not found in context")
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
 	roles, err := f.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
 	if err != nil {
-		log.Errorf("failde to get user roles. err: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "failde to get user roles")
+		log.Errorf("[GetFaculties] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
 	}
 
 	isAdmin := false
@@ -47,15 +48,16 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 		}
 	}
 	if !isAdmin {
+		log.Errorf("[GetFaculties] permission denied for user id %d", currentUser.ID)
 		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
 	}
 
 	faculties, err := f.faculService.GetInfoAboutUni(context.TODO(), currentUser.ID)
 
 	if err != nil {
+		log.Errorf("[GetFaculties] failed get faculties. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get faculties")
 	}
 
-	// faculties
 	return c.JSON(http.StatusOK, faculties)
 }

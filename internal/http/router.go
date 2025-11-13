@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,13 +14,13 @@ import (
 func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService *auth.JWTService, uniHandler *handlers.UniHandler, personsHandler *handlers.PersonalitiesHandler, facultiesHandler *handlers.FaculHandler) *echo.Echo {
 	e := echo.New()
 
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `[${time_rfc3339}] ${method} ${uri} ${status} ${latency_human} ` +
-			`from=${remote_ip} ` +
-			`user_agent="${user_agent}" ` +
-			`error="${error}"` + "\n",
-		Output: os.Stdout,
-	}))
+	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+	// 	Format: `[${time_rfc3339}] ${method} ${uri} ${status} ${latency_human} ` +
+	// 		`from=${remote_ip} ` +
+	// 		`user_agent="${user_agent}" ` +
+	// 		`error="${error}"` + "\n",
+	// 	Output: os.Stdout,
+	// }))
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
@@ -45,9 +44,8 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 			echo.HeaderXRequestedWith,
 			"X-Requested-With",
 		},
-		AllowCredentials: true, // ✅ Уже есть - хорошо!
+		AllowCredentials: true,
 		MaxAge:           86400,
-		// Добавь для надежности:
 		ExposeHeaders: []string{"Set-Cookie"},
 	}))
 

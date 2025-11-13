@@ -31,14 +31,14 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
-		log.Errorf("Authentication error")
+		log.Errorf("[GetUniInfo] Authentication error")
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
 	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
 
 	if err != nil {
-		log.Errorf("failed get info about uni. err: %v", err)
+		log.Errorf("[GetUniInfo] Failed get info about uni. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get info about uni")
 	}
 
@@ -59,7 +59,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 	universities, err := u.uniService.GetAllUniversities(context.TODO())
 
 	if err != nil {
-		log.Errorf("failed get all universities. err: %v", err)
+		log.Errorf("[GetAllUniversities] failed get all universities. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get all universities")
 	}
 
@@ -84,7 +84,7 @@ func (u *UniHandler) CreateSemesters(c echo.Context) error {
 	var req dto.CreateSemestersRequest
 
 	if err := c.Bind(&req); err != nil {
-		log.Errorf("Invalid request format: %v ", err.Error())
+		log.Errorf("[CreateSemesters] Invalid request format: %v ", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request format: "+err.Error())
 	}
 

@@ -43,17 +43,20 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
+		log.Errorf("[RequestAccess] Authentication error. user not found in context")
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
 	var request personalities2.RequestAccessToUniversity
 
 	if err := json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
+		log.Errorf("[RequestAccess] failed to decode request body: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err := h.personServ.SendAccessToAddInUniversity(context.TODO(), int64(currentUser.ID), request)
 	if err != nil {
+		log.Errorf("[RequestAccess] failed to send access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

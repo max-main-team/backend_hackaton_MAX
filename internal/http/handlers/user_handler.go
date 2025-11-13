@@ -31,18 +31,20 @@ func (u *UserHandler) GetUserInfo(c echo.Context) error {
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
+		log.Errorf("[GetUserInfo] Authentication error. user not found in context")
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
 	userInfo, err := u.userService.GetUser(context.TODO(), currentUser.ID)
 
 	if err != nil {
+		log.Errorf("[GetUserInfo] Failed get user info: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get user info")
 	}
 
 	userRoles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
 	if err != nil {
-		log.Errorf("Failed find user roles: %v", err)
+		log.Errorf("[GetUserInfo] Failed find user roles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")
 	}
 

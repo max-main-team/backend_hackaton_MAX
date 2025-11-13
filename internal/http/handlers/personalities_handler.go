@@ -53,18 +53,18 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
-	if err != nil {
-		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
-	}
-	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
-		return s == "admin"
-	})
-	if !hasAdmin {
-		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
-		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
-	}
+	// roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	// if err != nil {
+	// 	log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
+	// }
+	// hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
+	// 	return s == "admin"
+	// })
+	// if !hasAdmin {
+	// 	log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
+	// 	return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
+	// }
 
 	var request personalities2.RequestAccessToUniversity
 
@@ -73,7 +73,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = h.personServ.SendAccessToAddInUniversity(context.TODO(), int64(currentUser.ID), request)
+	err := h.personServ.SendAccessToAddInUniversity(context.TODO(), int64(currentUser.ID), request)
 	if err != nil {
 		log.Errorf("[RequestAccess] failed to send access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

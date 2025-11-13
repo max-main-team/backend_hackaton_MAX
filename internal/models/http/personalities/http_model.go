@@ -14,3 +14,12 @@ type AccessRequestResponse struct {
 	} `json:"data"`
 	HasMore bool `json:"has_more"`
 }
+
+type AcceptAccessRequest struct {
+	UserID                 int64                  `json:"user_id" validate:"required"`
+	UserType               personalities.RoleType `json:"role" validate:"required"`
+	UniversityID           *int64                 `json:"university_id,omitempty"`
+	FacultyID              *int64                 `json:"faculty_id,omitempty"`
+	UniversityDepartmentID *int64                 `json:"university_department_id,omitempty"`
+	CourseGroupID          *int64                 `json:"course_group_id,omitempty"`
+}

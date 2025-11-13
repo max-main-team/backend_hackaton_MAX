@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
 )
 
@@ -85,4 +87,53 @@ func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit,
 	}
 
 	return result, nil
+}
+
+func (r *PersonalitiesRepo) AddNewUser(ctx context.Context, request personalities2.AcceptAccessRequest) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback(ctx)
+		} else if err != nil {
+			_ = tx.Rollback(ctx)
+		}
+		err = tx.Commit(ctx)
+	}()
+
+	var qInsertUser string
+
+	switch request.UserType {
+	case personalities.Student:
+		qInsertUser = fmt.Sprintf(`
+			INSERT INTO users.students (
+			                            max_user_id,
+			                            university_department_id,
+			                            course_group_id
+			) VALUES (%d, %d, %d)
+		`, request.UserID, request.UniversityDepartmentID, request.CourseGroupID)
+	case personalities.Teacher:
+		qInsertUser = fmt.Sprintf(`
+			INSERT INTO users.teachers (
+			                            max_user_id
+			) VALUES (%d)
+	`, request.UserID)
+	case personalities.Admin:
+		qInsertUser = fmt.Sprintf(`
+		INSERT INTO users.administrations (
+		                                   max_user_id,
+		                                   university_id,
+		                                	faculty_id
+		) VALUES (%d, %d, %d)
+`, request.UserID, request.UniversityID, request.FacultyID)
+	}
+
+	_, err = tx.Exec(ctx, qInsertUser)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

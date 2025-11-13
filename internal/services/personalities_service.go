@@ -51,3 +51,11 @@ func (s *PersonalitiesService) GetAccessRequest(ctx context.Context, userID, lim
 
 	return &response, nil
 }
+
+func (s *PersonalitiesService) AcceptAccess(ctx context.Context, request personalities.AcceptAccessRequest) error {
+	err := s.PersonsRepo.AddNewUser(ctx, request)
+	if err != nil {
+		return err
+	}
+	return nil
+}

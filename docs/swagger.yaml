@@ -4,6 +4,24 @@ definitions:
     properties:
       message: {}
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AcceptAccessRequest:
+    properties:
+      course_group_id:
+        type: integer
+      faculty_id:
+        type: integer
+      role:
+        $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType'
+      university_department_id:
+        type: integer
+      university_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - role
+    - user_id
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AccessRequestResponse:
     properties:
       data:
@@ -114,6 +132,40 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: Request access to join a university
+      tags:
+      - personalities
+  /admin/personalities/access/accept:
+    post:
+      consumes:
+      - application/json
+      description: Accept Request of user that want to be (student/teacher/administration)
+      parameters:
+      - description: Access request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AcceptAccessRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Accept Request for adding in University
       tags:
       - personalities
 swagger: "2.0"

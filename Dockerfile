@@ -12,6 +12,8 @@ WORKDIR /root/
 
 COPY --from=builder /app/app /root/app
 COPY --from=builder /app/cfg/config.toml ./cfg/config.toml
+COPY --from=builder docs/swagger.json  ./docs/swagger.json 
+COPY --from=builder docs/swagger.yaml  ./docs/swagger.yaml 
 
 EXPOSE 8080
 

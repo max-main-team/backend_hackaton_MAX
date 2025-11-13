@@ -39,7 +39,7 @@ func NewPersonalitiesHandler(personServ *services.PersonalitiesService, logger e
 func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
-	log.Print(context.Background(), "RequestAccess called")
+	log.Print(context.Background(), "[RequestAccess] RequestAccess called")
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {

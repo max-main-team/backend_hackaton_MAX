@@ -27,7 +27,7 @@ func (u *UserHandler) GetUserInfo(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
 
-	log.Print(context.Background(), "GetUserInfo called")
+	log.Print(context.Background(), "[GetUserInfo] GetUserInfo called")
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {

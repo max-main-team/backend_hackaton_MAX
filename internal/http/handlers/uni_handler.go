@@ -28,7 +28,7 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
 
-	log.Print(context.Background(), "GetUniInfo called")
+	log.Print(context.Background(), "[GetUniInfo] GetUniInfo called")
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
@@ -55,7 +55,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
 
-	log.Print(context.Background(), "GetAllUniversities called")
+	log.Print(context.Background(), "[GetAllUniversities] GetAllUniversities called")
 
 	universities, err := u.uniService.GetAllUniversities(context.TODO())
 
@@ -82,14 +82,14 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 func (u *UniHandler) CreateSemesters(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[CreateSemesters] CreateSemesters called")
+
 	var req dto.CreateSemestersRequest
 
 	if err := c.Bind(&req); err != nil {
 		log.Errorf("[CreateSemesters] Invalid request format: %v ", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request format: "+err.Error())
 	}
-
-	log.Print(context.Background(), "CreateSemesters called")
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {

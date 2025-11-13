@@ -26,7 +26,7 @@ func NewFaculHandler(service *services.FaculService, logger embedlog.Logger) *Fa
 func (f *FaculHandler) GetFaculties(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
-	log.Print(context.Background(), "GetUniInfo called")
+	log.Print(context.Background(), "[GetFaculties] GetUniInfo called")
 
 	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {

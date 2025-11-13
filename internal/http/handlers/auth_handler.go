@@ -315,7 +315,7 @@ type UserInfo struct {
 func (h *AuthHandler) CheckToken(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
-	log.Print(context.Background(), "CheckToken called")
+	log.Print(context.Background(), "[CheckToken] CheckToken called")
 	user := auth.GetUserFromContext(c)
 	if user == nil {
 		log.Printf("User not found in context")

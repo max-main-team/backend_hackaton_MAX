@@ -4,6 +4,28 @@ definitions:
     properties:
       message: {}
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateSemestersRequest:
+    properties:
+      periods:
+        items:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod'
+        type: array
+      uni_id:
+        type: integer
+    required:
+    - periods
+    - uni_id
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod:
+    properties:
+      end_date:
+        type: string
+      start_date:
+        type: string
+    required:
+    - end_date
+    - start_date
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AcceptAccessRequest:
     properties:
       course_group_id:
@@ -171,4 +193,49 @@ paths:
       summary: Accept Request for adding in University
       tags:
       - personalities
+  /universities/semesters:
+    post:
+      consumes:
+      - application/json
+      description: Create or replace semester periods for specific university. Admin
+        role required. This operation will delete all existing semesters for the university
+        and create new ones.
+      parameters:
+      - description: Semester periods data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateSemestersRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: semesters created successfully'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body or date format
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: Forbidden - user is not admin
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Create new semester periods for university
+      tags:
+      - universities
+      - admin
 swagger: "2.0"

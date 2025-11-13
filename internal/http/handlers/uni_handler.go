@@ -80,6 +80,20 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+// CreateNewNewSemesterPeriod godoc
+// @Summary      Create new semester periods for university
+// @Description  Create or replace semester periods for specific university. Admin role required. This operation will delete all existing semesters for the university and create new ones.
+// @Tags         universities, admin
+// @Accept       json
+// @Produce      json
+// @Param        request  body   dto.CreateSemestersRequest  true  "Semester periods data"
+// @Success      200   {object}  map[string]string  "status: semesters created successfully"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body or date format"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      403   {object}  echo.HTTPError  "Forbidden - user is not admin"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /universities/semesters [post]
+// @Security     BearerAuth
 func (u *UniHandler) CreateNewNewSemesterPeriod(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)

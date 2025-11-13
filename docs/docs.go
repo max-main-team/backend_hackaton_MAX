@@ -175,6 +175,73 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/universities/semesters": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create or replace semester periods for specific university. Admin role required. This operation will delete all existing semesters for the university and create new ones.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities",
+                    "admin"
+                ],
+                "summary": "Create new semester periods for university",
+                "parameters": [
+                    {
+                        "description": "Semester periods data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateSemestersRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: semesters created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or date format",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -182,6 +249,39 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {}
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateSemestersRequest": {
+            "type": "object",
+            "required": [
+                "periods",
+                "uni_id"
+            ],
+            "properties": {
+                "periods": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod"
+                    }
+                },
+                "uni_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod": {
+            "type": "object",
+            "required": [
+                "end_date",
+                "start_date"
+            ],
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                }
             }
         },
         "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AcceptAccessRequest": {
@@ -270,6 +370,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API for Hackaton backend",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	// LeftDelim:        "{{",
+	// RightDelim:       "}}",
 }
 
 func init() {

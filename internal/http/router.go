@@ -81,8 +81,8 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 	// protected.GET("/test", userHandler.GetUserById)
 
-	admim := protected.Group("/admin")
-	faculties := admim.Group("/faculties")
+	admin := protected.Group("/admin")
+	faculties := admin.Group("/faculties")
 	faculties.GET("", facultiesHandler.GetFaculties)
 
 	uni := protected.Group("/universities")

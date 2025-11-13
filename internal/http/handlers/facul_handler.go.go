@@ -65,7 +65,7 @@ func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 
 	isAdmin := false
 	for _, role := range roles.Roles {
-		if role == "admim" {
+		if role == "admin" {
 			isAdmin = true
 			break
 		}
@@ -102,7 +102,7 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 
 	isAdmin := false
 	for _, role := range roles.Roles {
-		if role == "admim" {
+		if role == "admin" {
 			isAdmin = true
 			break
 		}

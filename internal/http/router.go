@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	_ "github.com/max-main-team/backend_hackaton_MAX/docs"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http/handlers"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/services/auth"
 	echoSwagger "github.com/swaggo/echo-swagger"

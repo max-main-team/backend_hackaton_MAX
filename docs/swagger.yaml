@@ -4,14 +4,28 @@ definitions:
     properties:
       message: {}
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AccessRequestResponse:
+    properties:
+      data:
+        items:
+          properties:
+            role:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType'
+            user_id:
+              type: integer
+          type: object
+        type: array
+      has_more:
+        type: boolean
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RequestAccessToUniversity:
     properties:
       role:
-        $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType'
+        $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType'
       university_id:
         type: integer
     type: object
-  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType:
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType:
     enum:
     - student
     - teacher
@@ -28,11 +42,51 @@ info:
   version: "1.0"
 paths:
   /personalities/access:
+    get:
+      consumes:
+      - application/json
+      description: Current authenticated user sends a request to get a access requests
+        to be in university (student/teacher/administration).
+      parameters:
+      - default: 5
+        description: limit of requests max(50), default(5)
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: offset default(0)
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requests for administration
+          schema:
+            $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AccessRequestResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: get all requests access for administration of university
+      tags:
+      - personalities
     post:
       consumes:
       - application/json
       description: Current authenticated user sends a request to get a role in a university
-        (student/teacher/admin).
+        (student/teacher/administration).
       parameters:
       - description: Access request
         in: body

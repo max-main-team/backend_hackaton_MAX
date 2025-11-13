@@ -96,6 +96,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	persons := protected.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)
+	persons.GET("/access", personsHandler.GetRequests)
 
 	return e
 }

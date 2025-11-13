@@ -53,3 +53,36 @@ func (r *PersonalitiesRepo) RequestUniversityAccess(ctx context.Context, uniAcce
 
 	return nil
 }
+
+func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error) {
+	const qGetAccessByUser = `
+		SELECT
+			from_max_user_id as user_id,
+			role_type as role
+		FROM users.persons_adds as u
+		WHERE u.to_administration_id = $1
+		ORDER BY user_id ASC
+		LIMIT $2 OFFSET $3
+	`
+
+	rows, err := r.pool.Query(ctx, qGetAccessByUser, userID, limit, offset)
+	if err != nil {
+		return personalities.AccessRequests{}, err
+	}
+	defer rows.Close()
+
+	var result personalities.AccessRequests
+	for rows.Next() {
+		var userID int64
+		var roleType personalities.RoleType
+		if err := rows.Scan(&userID, &roleType); err != nil {
+			return personalities.AccessRequests{}, err
+		}
+		result.Requests = append(result.Requests, struct {
+			UserID   int64
+			UserType personalities.RoleType
+		}{userID, roleType})
+	}
+
+	return result, nil
+}

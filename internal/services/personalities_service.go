@@ -21,7 +21,7 @@ func NewPersonalitiesService(personsRepo repositories.PersonalitiesRepository) *
 func (s *PersonalitiesService) SendAccessToAddInUniversity(ctx context.Context, userID int64, request personalities.RequestAccessToUniversity) error {
 
 	access := personalities2.UniversityAccess{
-		UserType:     personalities2.RoleType(request.UserType),
+		UserType:     request.UserType,
 		UniversityID: request.UniversityID,
 		UserID:       userID,
 	}
@@ -31,4 +31,23 @@ func (s *PersonalitiesService) SendAccessToAddInUniversity(ctx context.Context, 
 		return err
 	}
 	return nil
+}
+
+func (s *PersonalitiesService) GetAccessRequest(ctx context.Context, userID, limit, offset int64) (*personalities.AccessRequestResponse, error) {
+	accesses, err := s.PersonsRepo.GetAccessRequest(ctx, userID, limit+1, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	var response personalities.AccessRequestResponse
+
+	if int64(len(accesses.Requests)) > limit {
+		response.HasMore = true
+	}
+	response.Data = []struct {
+		UserID   int64                   `json:"user_id"`
+		UserType personalities2.RoleType `json:"role"`
+	}(accesses.Requests[:limit])
+
+	return &response, nil
 }

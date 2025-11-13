@@ -16,8 +16,65 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/personalities/access": {
+            "get": {
+                "description": "Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "get all requests access for administration of university",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "limit of requests max(50), default(5)",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "offset default(0)",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requests for administration",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AccessRequestResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Current authenticated user sends a request to get a role in a university (student/teacher/admin).",
+                "description": "Current authenticated user sends a request to get a role in a university (student/teacher/administration).",
                 "consumes": [
                     "application/json"
                 ],
@@ -75,18 +132,40 @@ const docTemplate = `{
                 "message": {}
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AccessRequestResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "role": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType"
+                            },
+                            "user_id": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "has_more": {
+                    "type": "boolean"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RequestAccessToUniversity": {
             "type": "object",
             "properties": {
                 "role": {
-                    "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType"
+                    "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType"
                 },
                 "university_id": {
                     "type": "integer"
                 }
             }
         },
-        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.RoleType": {
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType": {
             "type": "string",
             "enum": [
                 "student",
@@ -112,6 +191,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API for Hackaton backend",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

@@ -27,6 +27,7 @@ type UniRepository interface {
 
 type PersonalitiesRepository interface {
 	RequestUniversityAccess(ctx context.Context, uniAccess personalities.UniversityAccess) error
+	GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error)
 }
 
 type FaculRepository interface {

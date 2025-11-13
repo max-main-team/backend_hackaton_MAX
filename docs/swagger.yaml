@@ -138,7 +138,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Accept Request of user that want to be (student/teacher/administration)
+      description: Accept Request of user that want to be (student/teacher/administration),
+        for student field university_department_id is required, course_group_id can
+        be skipped. For administrations university_id is required, faculty_id can
+        be skipped
       parameters:
       - description: Access request
         in: body

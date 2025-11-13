@@ -127,7 +127,7 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 
 // AcceptAccess godoc
 // @Summary      Accept Request for adding in University
-// @Description  Accept Request of user that want to be (student/teacher/administration)
+// @Description  Accept Request of user that want to be (student/teacher/administration), for student field university_department_id is required, course_group_id can be skipped. For administrations university_id is required, faculty_id can be skipped
 // @Tags         personalities
 // @Accept       json
 // @Produce      json
@@ -141,7 +141,7 @@ func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[AcceptRequest] AcceptRequest called")
 
-	currentUser, ok := c.Get("user").(*models.User)
+	_, ok := c.Get("user").(*models.User)
 	if !ok {
 		log.Errorf("[AcceptRequest] Authentication error. user not found in context")
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")

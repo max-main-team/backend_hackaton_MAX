@@ -28,24 +28,24 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 			method := c.Request().Method
 			path := c.Request().RequestURI
 
-			log.Printf("[JWTMiddleware] AUTH_START %s %s", c.Request().Method, c.Request().RequestURI)
+			log.Printf("[JWTMiddleware] AUTH_START %s %s", method, path)
 
 			authHeader := c.Request().Header.Get("Authorization")
 			if authHeader == "" {
-				log.Errorf("[JWTMiddleware] AUTH_FAIL: %s %s reason=missing_auth_header", method, path)
+				log.Errorf("[JWTMiddleware] AUTH_FAIL %s %s reason=missing_auth_header", method, path)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
 			}
 
 			parts := strings.SplitN(authHeader, " ", 2)
 			if len(parts) != 2 || parts[0] != "Bearer" {
-				log.Errorf("[JWTMiddleware] AUTH_FAIL: %s %s reason=invalid_auth_format", method, path)
+				log.Errorf("[JWTMiddleware] AUTH_FAIL %s %s reason=invalid_auth_format", method, path)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization format")
 			}
 
 			tokenString := parts[1]
 			claims, err := s.ParseToken(tokenString)
 			if err != nil {
-				log.Errorf("[JWTMiddleware] AUTH_FAIL: token parse failed: %v. token input: %v", err, tokenString)
+				log.Errorf("[JWTMiddleware] AUTH_FAIL token parse failed: %v. token input: %v", err, tokenString)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token: "+err.Error())
 			}
 			user := &models.User{
@@ -61,7 +61,7 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 			}
 			c.Set(UserKey, user)
 
-			log.Printf("[JWTMiddleware] AUTH_SUCCESS %s %s max_id_user=%d", c.Request().Method, c.Request().RequestURI, claims.ID)
+			log.Printf("[JWTMiddleware] AUTH_SUCCESS %s %s max_id_user=%d", method, path, claims.ID)
 			return next(c)
 		}
 	}

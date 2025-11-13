@@ -59,7 +59,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
 	}
 	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
-		return s == "admin "
+		return s == "admin"
 	})
 	if !hasAdmin {
 		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
@@ -112,7 +112,7 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
 	}
 	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
-		return s == "admin "
+		return s == "admin"
 	})
 	if !hasAdmin {
 		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
@@ -181,7 +181,7 @@ func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
 	}
 	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
-		return s == "admin "
+		return s == "admin"
 	})
 	if !hasAdmin {
 		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")

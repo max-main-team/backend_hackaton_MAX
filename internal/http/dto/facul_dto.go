@@ -1,5 +1,6 @@
 package dto
 
 type CreateNewFacultyRequest struct {
-	Name string `json:"faculty_name" validate:"required" example:"FITP"`
+	Name string `json:"faculty_name" validate:"required" example:"FITIP"`
 }
+

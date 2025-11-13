@@ -7,7 +7,7 @@ definitions:
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateNewFacultyRequest:
     properties:
       faculty_name:
-        example: FITP
+        example: FITIP
         type: string
     required:
     - faculty_name

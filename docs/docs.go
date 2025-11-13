@@ -376,7 +376,7 @@ const docTemplate = `{
             "properties": {
                 "faculty_name": {
                     "type": "string",
-                    "example": "FITP"
+                    "example": "FITIP"
                 }
             }
         },

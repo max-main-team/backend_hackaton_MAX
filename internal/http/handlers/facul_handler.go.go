@@ -17,10 +17,11 @@ type FaculHandler struct {
 	logger       embedlog.Logger
 }
 
-func NewFaculHandler(service *services.FaculService, logger embedlog.Logger) *FaculHandler {
+func NewFaculHandler(faculService *services.FaculService, userService *services.UserService, logger embedlog.Logger) *FaculHandler {
 	return &FaculHandler{
-		faculService: service,
+		faculService: faculService,
 		logger:       logger,
+		userService:  userService,
 	}
 }
 

@@ -88,7 +88,7 @@ func (a *App) initDependencies() {
 	a.uniHandler = handlers.NewUniHandler(uniService, userService, a.sl)
 
 	a.personsHandler = handlers.NewPersonalitiesHandler(personService, userService, a.sl)
-	a.facultiesHandler = handlers.NewFaculHandler(faculService, a.sl)
+	a.facultiesHandler = handlers.NewFaculHandler(faculService, userService, a.sl)
 	a.subjectsHandler = handlers.NewSubjectHandler(subjectsService, userService, a.sl)
 
 	if a.jwtService == nil {

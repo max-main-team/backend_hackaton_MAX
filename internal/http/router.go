@@ -12,7 +12,14 @@ import (
 	"github.com/vmkteam/embedlog"
 )
 
-func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, jwtService *auth.JWTService, uniHandler *handlers.UniHandler, personsHandler *handlers.PersonalitiesHandler, facultiesHandler *handlers.FaculHandler) *echo.Echo {
+func NewRouter(logger embedlog.Logger,
+	userHandler *handlers.UserHandler,
+	authHandler *handlers.AuthHandler,
+	jwtService *auth.JWTService,
+	uniHandler *handlers.UniHandler,
+	personsHandler *handlers.PersonalitiesHandler,
+	facultiesHandler *handlers.FaculHandler,
+	subjectsHandler *handlers.SubjectHandler) *echo.Echo {
 	e := echo.New()
 
 	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -95,9 +102,15 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	// get info about all universities
 	uni.GET("/", uniHandler.GetAllUniversities)
 
+	// persons
 	persons := admin.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)
 	persons.GET("/access", personsHandler.GetRequests)
+	persons.POST("/access/accept", personsHandler.AcceptAccess)
+
+	// subjects
+	subjects := admin.Group("/subjects")
+	subjects.POST("", subjectsHandler.Create)
 
 	return e
 }

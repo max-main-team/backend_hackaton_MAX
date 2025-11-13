@@ -39,3 +39,7 @@ type FaculRepository interface {
 	GetFaculsByUserID(ctx context.Context, id int64) ([]models.Faculties, error)
 	CreateFaculty(ctx context.Context, id int64, facultyName string) error
 }
+
+type SubjectsRepository interface {
+	Create(ctx context.Context, name string, uniID int64) error
+}

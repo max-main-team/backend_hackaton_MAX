@@ -36,7 +36,7 @@ func NewPersonalitiesHandler(personServ *services.PersonalitiesService, logger e
 // @Failure      400   {object}  echo.HTTPError  "Invalid request body"
 // @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
-// @Router       /personalities/access [post]
+// @Router       /admin/personalities/access [post]
 func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
@@ -76,7 +76,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 // @Failure      400   {object}  echo.HTTPError  "Invalid request body"
 // @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
-// @Router       /personalities/access [get]
+// @Router       /admin/personalities/access [get]
 func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 

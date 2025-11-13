@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/personalities/access": {
+        "/admin/personalities/access": {
             "get": {
                 "description": "Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).",
                 "consumes": [

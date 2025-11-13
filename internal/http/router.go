@@ -94,7 +94,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	// get info about all universities
 	uni.GET("/", uniHandler.GetAllUniversities)
 
-	persons := protected.Group("/personalities")
+	persons := admin.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)
 	persons.GET("/access", personsHandler.GetRequests)
 

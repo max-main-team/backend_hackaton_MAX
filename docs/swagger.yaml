@@ -41,7 +41,7 @@ info:
   title: Hackaton API
   version: "1.0"
 paths:
-  /personalities/access:
+  /admin/personalities/access:
     get:
       consumes:
       - application/json

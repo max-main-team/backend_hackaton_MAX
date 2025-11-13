@@ -8,7 +8,7 @@
     },
     "basePath": "/api/v1",
     "paths": {
-        "/personalities/access": {
+        "/admin/personalities/access": {
             "get": {
                 "description": "Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).",
                 "consumes": [

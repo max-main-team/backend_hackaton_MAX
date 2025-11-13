@@ -63,7 +63,7 @@ func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 	err = f.faculService.CreateNewFaculty(context.TODO(), req.Name, currentUser.ID)
 
 	if err != nil {
-		return  c.JSON(http.StatusInternalServerError, "failed create new faculty")
+		return c.JSON(http.StatusInternalServerError, "failed create new faculty")
 	}
 	return c.JSON(http.StatusOK, "faculty created successfully")
 }

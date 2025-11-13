@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
+	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
 )
 
@@ -30,6 +31,8 @@ type UniRepository interface {
 
 type PersonalitiesRepository interface {
 	RequestUniversityAccess(ctx context.Context, uniAccess personalities.UniversityAccess) error
+	GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error)
+	AddNewUser(ctx context.Context, request personalities2.AcceptAccessRequest) error
 }
 
 type FaculRepository interface {

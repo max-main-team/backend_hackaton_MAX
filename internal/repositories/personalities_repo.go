@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
 )
 
@@ -47,6 +49,88 @@ func (r *PersonalitiesRepo) RequestUniversityAccess(ctx context.Context, uniAcce
 	`
 
 	_, err = tx.Exec(ctx, qSendAccess, uniAccess.UserID, uniAccess.UserType, uniAccess.UniversityID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error) {
+	const qGetAccessByUser = `
+		SELECT
+			from_max_user_id as user_id,
+			role_type as role
+		FROM users.persons_adds as u
+		WHERE u.to_administration_id = $1
+		ORDER BY user_id ASC
+		LIMIT $2 OFFSET $3
+	`
+
+	rows, err := r.pool.Query(ctx, qGetAccessByUser, userID, limit, offset)
+	if err != nil {
+		return personalities.AccessRequests{}, err
+	}
+	defer rows.Close()
+
+	var result personalities.AccessRequests
+	for rows.Next() {
+		var userID int64
+		var roleType personalities.RoleType
+		if err := rows.Scan(&userID, &roleType); err != nil {
+			return personalities.AccessRequests{}, err
+		}
+		result.Requests = append(result.Requests, struct {
+			UserID   int64
+			UserType personalities.RoleType
+		}{userID, roleType})
+	}
+
+	return result, nil
+}
+
+func (r *PersonalitiesRepo) AddNewUser(ctx context.Context, request personalities2.AcceptAccessRequest) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback(ctx)
+		} else if err != nil {
+			_ = tx.Rollback(ctx)
+		}
+		err = tx.Commit(ctx)
+	}()
+
+	var qInsertUser string
+
+	switch request.UserType {
+	case personalities.Student:
+		qInsertUser = fmt.Sprintf(`
+			INSERT INTO users.students (
+			                            max_user_id,
+			                            university_department_id,
+			                            course_group_id
+			) VALUES (%d, %d, %d)
+		`, request.UserID, request.UniversityDepartmentID, request.CourseGroupID)
+	case personalities.Teacher:
+		qInsertUser = fmt.Sprintf(`
+			INSERT INTO users.teachers (
+			                            max_user_id
+			) VALUES (%d)
+	`, request.UserID)
+	case personalities.Admin:
+		qInsertUser = fmt.Sprintf(`
+		INSERT INTO users.administrations (
+		                                   max_user_id,
+		                                   university_id,
+		                                	faculty_id
+		) VALUES (%d, %d, %d)
+`, request.UserID, request.UniversityID, request.FacultyID)
+	}
+
+	_, err = tx.Exec(ctx, qInsertUser)
 	if err != nil {
 		return err
 	}

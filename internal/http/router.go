@@ -81,8 +81,8 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	protected.GET("/auth/checkToken", authHandler.CheckToken)
 	// protected.GET("/test", userHandler.GetUserById)
 
-	admim := protected.Group("/admin")
-	faculties := admim.Group("/faculties")
+	admin := protected.Group("/admin")
+	faculties := admin.Group("/faculties")
 	faculties.GET("", facultiesHandler.GetFaculties)
 
 	uni := protected.Group("/universities")
@@ -94,8 +94,9 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	// get info about all universities
 	uni.GET("/", uniHandler.GetAllUniversities)
 
-	persons := protected.Group("/personalities")
+	persons := admin.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)
+	persons.GET("/access", personsHandler.GetRequests)
 
 	return e
 }

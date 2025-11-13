@@ -18,3 +18,10 @@ type PaginationParams struct {
 	Limit  int64
 	Offset int64
 }
+
+type AccessRequests struct {
+	Requests []struct {
+		UserID   int64
+		UserType RoleType
+	}
+}

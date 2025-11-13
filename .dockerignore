@@ -1,7 +1,6 @@
 .git
 .idea
 .vscode
-**/*_test.go
 build/
 dist/
 tmp/

@@ -46,7 +46,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 		},
 		AllowCredentials: true,
 		MaxAge:           86400,
-		ExposeHeaders: []string{"Set-Cookie"},
+		ExposeHeaders:    []string{"Set-Cookie"},
 	}))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {

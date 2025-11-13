@@ -12,8 +12,9 @@ import (
 )
 
 type UniHandler struct {
-	uniService *services.UniService
-	logger     embedlog.Logger
+	uniService  *services.UniService
+	userService *services.UserService
+	logger      embedlog.Logger
 }
 
 func NewUniHandler(service *services.UniService, logger embedlog.Logger) *UniHandler {
@@ -90,15 +91,32 @@ func (u *UniHandler) CreateSemesters(c echo.Context) error {
 
 	log.Print(context.Background(), "CreateSemesters called")
 
-	// currentUser, ok := c.Get("user").(*models.User)
-	// if !ok {
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
-	// }
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
+	}
+	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[CreateSemesters] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+	}
 
-	// err := u.uniService.CreateSemesters(context.TODO(), int64(req.ID),req.Periods)
-	// if err != nil {
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, "failed create semesters")
-	// }
+	isAdmin := false
+	for _, role := range roles.Roles {
+		if role == "admin" {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		log.Errorf("[CreateSemesters] permission denied for user id %d", currentUser.ID)
+		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
+	}
+
+	err = u.uniService.CreateSemesters(context.TODO(), int64(req.ID), req.Periods)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed create semesters")
+	}
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "semesters created successfully"})
 }

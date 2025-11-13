@@ -2,13 +2,13 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
+	"github.com/vmkteam/embedlog"
 )
 
 const UserKey = "user"
@@ -17,34 +17,35 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
+			log := c.Get("logger").(embedlog.Logger)
+
 			reqID := c.Response().Header().Get(echo.HeaderXRequestID)
 			if reqID == "" {
-
 				reqID = fmt.Sprintf("%d", time.Now().UnixNano())
 				c.Response().Header().Set(echo.HeaderXRequestID, reqID)
 			}
 
-			log.Printf("[req %s] -> %s %s from=%s", reqID, c.Request().Method, c.Request().RequestURI, c.RealIP())
+			method := c.Request().Method
+			path := c.Request().RequestURI
+
+			log.Printf("[JWTMiddleware] AUTH_START %s %s", c.Request().Method, c.Request().RequestURI)
 
 			authHeader := c.Request().Header.Get("Authorization")
 			if authHeader == "" {
-				log.Printf("[req %s] auth missing", reqID)
+				log.Errorf("[JWTMiddleware] AUTH_FAIL: %s %s reason=missing_auth_header", method, path)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
 			}
 
-			log.Printf("??????????? inof: %v", authHeader)
-
 			parts := strings.SplitN(authHeader, " ", 2)
 			if len(parts) != 2 || parts[0] != "Bearer" {
-				log.Printf("[req %s] invalid auth format", reqID)
+				log.Errorf("[JWTMiddleware] AUTH_FAIL: %s %s reason=invalid_auth_format", method, path)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authorization format")
 			}
 
 			tokenString := parts[1]
 			claims, err := s.ParseToken(tokenString)
 			if err != nil {
-				log.Printf("!!!!!! TOKEN: %v", tokenString)
-				log.Printf("[req %s] token parse failed: %v", reqID, err)
+				log.Errorf("[JWTMiddleware] AUTH_FAIL: token parse failed: %v. token input: %v", err, tokenString)
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token: "+err.Error())
 			}
 			user := &models.User{
@@ -60,8 +61,7 @@ func (s *JWTService) JWTMiddleware() echo.MiddlewareFunc {
 			}
 			c.Set(UserKey, user)
 
-			log.Printf("authenticated user_id = %v", user.ID)
-
+			log.Printf("[JWTMiddleware] AUTH_SUCCESS %s %s max_id_user=%d", c.Request().Method, c.Request().RequestURI, claims.ID)
 			return next(c)
 		}
 	}

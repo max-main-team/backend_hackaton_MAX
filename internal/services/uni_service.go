@@ -36,11 +36,11 @@ func (u *UniService) GetAllUniversities(ctx context.Context) ([]models.Universit
 	return universities, nil
 }
 
-func (u *UniService) CreateSemesters(ctx context.Context, id int64, periods []dto.SemesterPeriod) (*models.UniversitiesData, error) {
+func (u *UniService) CreateSemesters(ctx context.Context, id int64, periods []dto.SemesterPeriod) error {
 	// err := u.uniRepo.CreateSemestersForUniversity(ctx, id, periods)
 	// if err != nil {
 	// 	return nil, err
 	// }
 
-	return nil, nil
+	return nil
 }

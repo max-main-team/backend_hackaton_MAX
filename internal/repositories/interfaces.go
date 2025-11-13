@@ -38,3 +38,7 @@ type PersonalitiesRepository interface {
 type FaculRepository interface {
 	GetFaculsByUserID(ctx context.Context, id int64) ([]models.Faculties, error)
 }
+
+type SubjectsRepository interface {
+	Create(ctx context.Context, name string, uniID int64) error
+}

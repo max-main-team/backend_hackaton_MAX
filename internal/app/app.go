@@ -32,6 +32,7 @@ type App struct {
 	uniHandler       *handlers.UniHandler
 	personsHandler   *handlers.PersonalitiesHandler
 	facultiesHandler *handlers.FaculHandler
+	subjectsHandler  *handlers.SubjectHandler
 }
 
 func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool) *App {
@@ -42,7 +43,14 @@ func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool
 		sl:      slogger,
 	}
 	a.initDependencies()
-	a.echo = http.NewRouter(a.sl, a.userHandler, a.authHandler, a.jwtService, a.uniHandler, a.personsHandler, a.facultiesHandler)
+	a.echo = http.NewRouter(a.sl,
+		a.userHandler,
+		a.authHandler,
+		a.jwtService,
+		a.uniHandler,
+		a.personsHandler,
+		a.facultiesHandler,
+		a.subjectsHandler)
 	return a
 }
 
@@ -58,6 +66,7 @@ func (a *App) initDependencies() {
 	uniRepo := repositories.NewUniRepository(a.db)
 	personsRepo := repositories.NewPersonalitiesRepo(a.db)
 	faculRepo := repositories.NewFaculRepository(a.db)
+	subjectsRepo := repositories.NewSubjectRepo(a.db)
 
 	// init services
 	userService := services.NewUserService(userRepo)
@@ -65,6 +74,7 @@ func (a *App) initDependencies() {
 	uniService := services.NewUniService(uniRepo)
 	faculService := services.NewFaculService(faculRepo)
 	personService := services.NewPersonalitiesService(personsRepo)
+	subjectsService := services.NewSubjectService(subjectsRepo)
 
 	// init handlers
 	a.userHandler = handlers.NewUserHandler(userService, a.sl)
@@ -79,6 +89,7 @@ func (a *App) initDependencies() {
 
 	a.personsHandler = handlers.NewPersonalitiesHandler(personService, userService, a.sl)
 	a.facultiesHandler = handlers.NewFaculHandler(faculService, a.sl)
+	a.subjectsHandler = handlers.NewSubjectHandler(subjectsService, userService, a.sl)
 
 	if a.jwtService == nil {
 		panic("jwt service is nil")

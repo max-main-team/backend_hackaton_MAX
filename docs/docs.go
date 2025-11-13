@@ -176,6 +176,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/subjects": {
+            "post": {
+                "description": "handler that provide creation of subject for university",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subjects"
+                ],
+                "summary": "create subject for university",
+                "parameters": [
+                    {
+                        "description": "Create request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.CreateSubjectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/universities/semesters": {
             "post": {
                 "security": [
@@ -276,10 +328,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "end_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-12-23T00:00:00Z"
                 },
                 "start_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2005-12-23T00:00:00Z"
                 }
             }
         },
@@ -343,6 +397,17 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.CreateSubjectRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "university_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType": {
             "type": "string",
             "enum": [
@@ -369,8 +434,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API for Hackaton backend",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	// LeftDelim:        "{{",
-	// RightDelim:       "}}",
 }
 
 func init() {

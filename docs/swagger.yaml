@@ -19,8 +19,10 @@ definitions:
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod:
     properties:
       end_date:
+        example: "2006-12-23T00:00:00Z"
         type: string
       start_date:
+        example: "2005-12-23T00:00:00Z"
         type: string
     required:
     - end_date
@@ -62,6 +64,13 @@ definitions:
     properties:
       role:
         $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType'
+      university_id:
+        type: integer
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.CreateSubjectRequest:
+    properties:
+      name:
+        type: string
       university_id:
         type: integer
     type: object
@@ -193,6 +202,40 @@ paths:
       summary: Accept Request for adding in University
       tags:
       - personalities
+  /admin/subjects:
+    post:
+      consumes:
+      - application/json
+      description: handler that provide creation of subject for university
+      parameters:
+      - description: Create request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.CreateSubjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: create subject for university
+      tags:
+      - subjects
   /universities/semesters:
     post:
       consumes:

@@ -48,6 +48,7 @@ func (u *UserHandler) GetUserInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")
 	}
 
+	log.Printf("[GetUserInfo] User info retrieved successfully for user ID %d. User roels: %v", currentUser.ID, userRoles.Roles)
 	return c.JSON(http.StatusOK, dto.UserInfoResponse{
 		UserRoles: userRoles.Roles,
 		User: dto.User{

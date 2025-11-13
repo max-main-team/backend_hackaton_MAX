@@ -15,12 +15,20 @@ func NewFaculService(repo repositories.FaculRepository) *FaculService {
 	return &FaculService{faculRepo: repo}
 }
 
-func (u *FaculService) GetInfoAboutUni(ctx context.Context, id int64) ([]models.Faculties, error) {
+func (f *FaculService) GetInfoAboutUni(ctx context.Context, id int64) ([]models.Faculties, error) {
 
-	faculties, err := u.faculRepo.GetFaculsByUserID(ctx, id)
+	faculties, err := f.faculRepo.GetFaculsByUserID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	return faculties, nil
+}
+
+func (f *FaculService) CreateNewFaculty(ctx context.Context, facultyName string, userID int64) error {
+	err := f.faculRepo.CreateFaculty(ctx, userID, facultyName)
+	if err != nil {
+		return err
+	}
+	return nil
 }

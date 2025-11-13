@@ -16,7 +16,7 @@ func NewFaculRepository(pool *pgxpool.Pool) FaculRepository {
 	return &faculRepository{pool: pool}
 }
 
-func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int64) ([]models.Faculties, error) {
+func (f *faculRepository) GetFaculsByUserID(ctx context.Context, id int64) ([]models.Faculties, error) {
 
 	var faculties []models.Faculties
 	query := `
@@ -34,7 +34,7 @@ func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int64) ([]mo
             WHERE max_user_id = $1
         )
     `
-	rows, err := u.pool.Query(ctx, query, id)
+	rows, err := f.pool.Query(ctx, query, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed GetFaculsByUserID from db. err: %w", err)
 	}
@@ -53,4 +53,29 @@ func (u *faculRepository) GetFaculsByUserID(ctx context.Context, id int64) ([]mo
 	}
 
 	return faculties, nil
+}
+
+func (f *faculRepository) CreateFaculty(ctx context.Context, userID int64, facultyName string) error {
+	query :=
+		`
+	 INSERT INTO universities.faculties (name,university_id)
+	 VALUES ( 
+	 	$1, 
+		(
+		 SELECT uud.id
+	 	 FROM universities.universities_data AS uud
+	 	 WHERE uud.id = (
+	 	 SELECT pa.university_id
+	 	 FROM personalities.administrations AS pa
+	 	 WHERE pa.max_user_id = $2
+		)
+	 )
+	)
+	`
+
+	_, err := f.pool.Exec(ctx, query, facultyName, userID)
+	if err != nil {
+		return fmt.Errorf("failed create new faculty. err: %w", err)
+	}
+	return nil
 }

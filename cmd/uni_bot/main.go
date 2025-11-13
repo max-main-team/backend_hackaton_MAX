@@ -1,7 +1,7 @@
 // @title Hackaton API
 // @version 1.0
 // @description API for Hackaton backend
-// @BasePath /api/v1
+// @BasePath /
 package main
 
 import (

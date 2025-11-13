@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
@@ -47,11 +48,6 @@ func (u *uniRepository) GetAllUniversities(ctx context.Context) ([]models.Univer
         FROM universities.universities_data AS uud
         JOIN universities.cities AS uc
 		ON uud.city_id = uc.id
-        WHERE uud.id = (
-            SELECT university_id 
-            FROM personalities.administrations
-            WHERE max_user_id = $1
-        )
 	`
 	rows, err := u.pool.Query(ctx, query)
 	if err != nil {
@@ -73,4 +69,9 @@ func (u *uniRepository) GetAllUniversities(ctx context.Context) ([]models.Univer
 	}
 
 	return universities, nil
+}
+
+func (u *uniRepository) CreateSemestersForUniversity(ctx context.Context, userID int64) error {
+	log.Println("ssdaa")
+	return nil
 }

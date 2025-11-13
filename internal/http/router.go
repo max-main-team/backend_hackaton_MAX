@@ -84,6 +84,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	admin := protected.Group("/admin")
 	faculties := admin.Group("/faculties")
 	faculties.GET("", facultiesHandler.GetFaculties)
+	faculties.POST("", facultiesHandler.CreateNewFaculty)
 
 	uni := protected.Group("/universities")
 

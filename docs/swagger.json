@@ -8,6 +8,72 @@
     },
     "basePath": "/",
     "paths": {
+        "/admin/faculties": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new faculty. Requires admin role. The faculty will be associated with the university of the current admin user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "faculties"
+                ],
+                "summary": "Create new faculty",
+                "parameters": [
+                    {
+                        "description": "Faculty creation data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateNewFacultyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Faculty created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/personalities/access": {
             "get": {
                 "description": "Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).",
@@ -243,6 +309,18 @@
                 "message": {}
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateNewFacultyRequest": {
+            "type": "object",
+            "required": [
+                "faculty_name"
+            ],
+            "properties": {
+                "faculty_name": {
+                    "type": "string",
+                    "example": "FITP"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateSemestersRequest": {
             "type": "object",
             "required": [
@@ -269,10 +347,12 @@
             ],
             "properties": {
                 "end_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-12-23T00:00:00Z"
                 },
                 "start_date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2005-12-23T00:00:00Z"
                 }
             }
         },

@@ -24,6 +24,20 @@ func NewFaculHandler(service *services.FaculService, logger embedlog.Logger) *Fa
 	}
 }
 
+// CreateNewFaculty godoc
+// @Summary Create new faculty
+// @Description Create a new faculty. Requires admin role. The faculty will be associated with the university of the current admin user.
+// @Tags faculties
+// @Accept json
+// @Produce json
+// @Param request body dto.CreateNewFacultyRequest true "Faculty creation data"
+// @Success 200 {object} map[string]string "Faculty created successfully"
+// @Failure 400 {object} echo.HTTPError "Invalid request data"
+// @Failure 401 {object} echo.HTTPError "Unauthorized - missing or invalid token"
+// @Failure 403 {object} echo.HTTPError "Forbidden - user is not admin"
+// @Failure 500 {object} echo.HTTPError "Internal server error"
+// @Router /admin/faculties [post]
+// @Security BearerAuth
 func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)

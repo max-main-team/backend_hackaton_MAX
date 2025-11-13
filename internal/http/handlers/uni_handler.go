@@ -59,6 +59,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 	universities, err := u.uniService.GetAllUniversities(context.TODO())
 
 	if err != nil {
+		log.Errorf("failed get all universities. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get all universities")
 	}
 

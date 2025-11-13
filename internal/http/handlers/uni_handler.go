@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http/dto"
@@ -79,7 +80,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (u *UniHandler) CreateSemesters(c echo.Context) error {
+func (u *UniHandler) CreateNewNewSemesterPeriod(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[CreateSemesters] CreateSemesters called")
@@ -113,10 +114,38 @@ func (u *UniHandler) CreateSemesters(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
 	}
 
-	err = u.uniService.CreateSemesters(context.TODO(), int64(req.ID), req.Periods)
+	periods, err := ConvertDtoModel(req.Periods)
+	if err != nil {
+		log.Errorf("[CreateSemesters] failed convert string time -> time.Time. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed convert string time -> time.Time")
+	}
+
+	err = u.uniService.SetNewSemesterPeriod(context.TODO(), int64(req.ID), periods)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed create semesters")
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "semesters created successfully"})
+}
+
+func ConvertDtoModel(dto []dto.SemesterPeriod) ([]models.SemesterPeriod, error) {
+	out := make([]models.SemesterPeriod, 0, len(dto))
+	for _, val := range dto {
+
+		startDate, err := time.Parse(time.RFC3339, val.StartDate)
+		if err != nil {
+			return nil, err
+		}
+
+		endDate, err := time.Parse(time.RFC3339, val.EndDate)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, models.SemesterPeriod{
+			StartDate: startDate,
+			EndDate:   endDate,
+		})
+	}
+	return out, nil
 }

@@ -22,6 +22,9 @@ type RefreshTokenRepository interface {
 
 type UniRepository interface {
 	GetAllUniversities(ctx context.Context) ([]models.UniversitiesData, error)
+
+	CreateSemestersForUniversity(ctx context.Context, uniID int64, periods []models.SemesterPeriod) error
+
 	GetUniInfoByUserID(ctx context.Context, id int64) (*models.UniversitiesData, error)
 }
 

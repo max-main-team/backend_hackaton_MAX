@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 )
@@ -71,7 +72,47 @@ func (u *uniRepository) GetAllUniversities(ctx context.Context) ([]models.Univer
 	return universities, nil
 }
 
-func (u *uniRepository) CreateSemestersForUniversity(ctx context.Context, userID int64) error {
-	log.Println("ssdaa")
+func (u *uniRepository) CreateSemestersForUniversity(ctx context.Context, uniID int64, periods []models.SemesterPeriod) error {
+
+	deleteQuery :=
+		`
+	DELETE FROM universities.semesters
+	WHERE university_id = $1
+
+	`
+	insertQuery :=
+		`
+	INSERT INTO universities.semesters (start_date,end_date,university_id)
+	VALUES ($1,$2,$3)
+	`
+
+	tx, err := u.pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.ReadCommitted,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			log.Printf("failed to rollback transaction: %v", err)
+		}
+	}()
+
+	_, err = tx.Exec(ctx, deleteQuery, uniID)
+	if err != nil {
+		return fmt.Errorf("failed delete semesters from db. err: %w", err)
+	}
+
+	for _, val := range periods {
+		_, err := tx.Exec(ctx, insertQuery, val.StartDate, val.EndDate, uniID)
+		if err != nil {
+			return fmt.Errorf("failed to insert to db. err: %w", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction. err: %w", err)
+	}
 	return nil
 }

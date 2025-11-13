@@ -2,8 +2,9 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"time"
 
-	"github.com/max-main-team/backend_hackaton_MAX/internal/http/dto"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/repositories"
 )
@@ -36,11 +37,47 @@ func (u *UniService) GetAllUniversities(ctx context.Context) ([]models.Universit
 	return universities, nil
 }
 
-func (u *UniService) CreateSemesters(ctx context.Context, id int64, periods []dto.SemesterPeriod) error {
-	// err := u.uniRepo.CreateSemestersForUniversity(ctx, id, periods)
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (u *UniService) SetNewSemesterPeriod(ctx context.Context, uniID int64, periods []models.SemesterPeriod) error {
+
+	err := ValidateSemesters(periods)
+	if err != nil {
+		return fmt.Errorf("failed create semesters. Invalid semesters periods. err :%w", err)
+	}
+
+	err = u.uniRepo.CreateSemestersForUniversity(ctx, uniID, periods)
+	if err != nil {
+		return fmt.Errorf("failed create semesters. err :%w", err)
+	}
+
+	return nil
+}
+
+func ValidateSemesters(periods []models.SemesterPeriod) error {
+	if len(periods) == 0 {
+		return fmt.Errorf("no periods provided")
+	}
+
+	for i, current := range periods {
+
+		if current.StartDate.IsZero() || current.EndDate.IsZero() {
+			return fmt.Errorf("semester %d: empty dates", i)
+		}
+
+		if current.StartDate.After(current.EndDate) {
+			return fmt.Errorf("semester %d: start date after end date", i)
+		}
+
+		if current.EndDate.Sub(current.StartDate) < 24*time.Hour {
+			return fmt.Errorf("semester %d: duration less than 1 day", i)
+		}
+
+		if i > 0 {
+			prev := periods[i-1]
+			if current.StartDate.Before(prev.EndDate) {
+				return fmt.Errorf("semester %d overlaps with previous", i)
+			}
+		}
+	}
 
 	return nil
 }

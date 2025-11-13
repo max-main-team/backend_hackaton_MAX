@@ -10,8 +10,8 @@ type UniInfoResponse struct {
 }
 
 type SemesterPeriod struct {
-	StartDate int64 `json:"start_date" validate:"required"`
-	EndDate   int64 `json:"end_date" validate:"required"`
+	StartDate string `json:"start_date" validate:"required"`
+	EndDate   string `json:"end_date" validate:"required"`
 }
 
 type CreateSemestersRequest struct {

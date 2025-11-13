@@ -23,6 +23,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 	// }))
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+
 		AllowOrigins: []string{
 			"https://hackaton-max.vercel.app",
 			"https://msokovykh.ru",
@@ -55,8 +56,8 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 			return next(c)
 		}
 	})
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	// e.GET("/test", userHandler.GetUserById)
 
 	e.GET("/", func(c echo.Context) error {

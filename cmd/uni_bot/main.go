@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	config "github.com/max-main-team/backend_hackaton_MAX/cfg"
+	_ "github.com/max-main-team/backend_hackaton_MAX/docs"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/app"
 	"github.com/vmkteam/embedlog"
 )

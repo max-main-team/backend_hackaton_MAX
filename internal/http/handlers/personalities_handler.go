@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -17,12 +18,14 @@ import (
 
 type PersonalitiesHandler struct {
 	personServ *services.PersonalitiesService
+	userServ   *services.UserService
 	logger     embedlog.Logger
 }
 
-func NewPersonalitiesHandler(personServ *services.PersonalitiesService, logger embedlog.Logger) *PersonalitiesHandler {
+func NewPersonalitiesHandler(personServ *services.PersonalitiesService, userServ *services.UserService, logger embedlog.Logger) *PersonalitiesHandler {
 	return &PersonalitiesHandler{
 		personServ: personServ,
+		userServ:   userServ,
 		logger:     logger,
 	}
 }
@@ -50,6 +53,19 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
+	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
+	}
+	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
+		return s == "admin "
+	})
+	if !hasAdmin {
+		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
+	}
+
 	var request personalities2.RequestAccessToUniversity
 
 	if err := json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
@@ -57,7 +73,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.personServ.SendAccessToAddInUniversity(context.TODO(), int64(currentUser.ID), request)
+	err = h.personServ.SendAccessToAddInUniversity(context.TODO(), int64(currentUser.ID), request)
 	if err != nil {
 		log.Errorf("[RequestAccess] failed to send access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -90,11 +106,23 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
+	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
+	}
+	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
+		return s == "admin "
+	})
+	if !hasAdmin {
+		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
+	}
+
 	params := c.QueryParams()
 	limit := params.Get("limit")
 	offset := params.Get("offset")
 
-	var err error
 	var limitInt, offsetInt int64
 	if limit != "" {
 		limitInt, err = strconv.ParseInt(limit, 10, 64)
@@ -141,19 +169,31 @@ func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[AcceptRequest] AcceptRequest called")
 
-	_, ok := c.Get("user").(*models.User)
+	currentUser, ok := c.Get("user").(*models.User)
 	if !ok {
 		log.Errorf("[AcceptRequest] Authentication error. user not found in context")
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
+	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
+	}
+	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
+		return s == "admin "
+	})
+	if !hasAdmin {
+		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
+	}
+
 	var request personalities2.AcceptAccessRequest
-	if err := json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
+	if err = json.NewDecoder(c.Request().Body).Decode(&request); err != nil {
 		log.Errorf("[AcceptRequest] failed to decode request body: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var err error
 	switch request.UserType {
 	case personalities.Student:
 		if request.UniversityDepartmentID == nil {

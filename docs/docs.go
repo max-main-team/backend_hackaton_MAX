@@ -191,8 +191,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "universities",
-                    "admin"
+                    "universities"
                 ],
                 "summary": "Create new semester periods for university",
                 "parameters": [

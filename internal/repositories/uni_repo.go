@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -94,8 +93,8 @@ func (u *uniRepository) CreateSemestersForUniversity(ctx context.Context, uniID 
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
-		if err := tx.Rollback(ctx); err != nil {
-			log.Printf("failed to rollback transaction: %v", err)
+		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil {
+			_ = rollbackErr
 		}
 	}()
 

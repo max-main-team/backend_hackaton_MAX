@@ -237,5 +237,4 @@ paths:
       summary: Create new semester periods for university
       tags:
       - universities
-      - admin
 swagger: "2.0"

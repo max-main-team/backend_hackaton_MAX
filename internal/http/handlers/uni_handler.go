@@ -83,7 +83,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 // CreateNewNewSemesterPeriod godoc
 // @Summary      Create new semester periods for university
 // @Description  Create or replace semester periods for specific university. Admin role required. This operation will delete all existing semesters for the university and create new ones.
-// @Tags         universities, admin
+// @Tags         universities
 // @Accept       json
 // @Produce      json
 // @Param        request  body   dto.CreateSemestersRequest  true  "Semester periods data"

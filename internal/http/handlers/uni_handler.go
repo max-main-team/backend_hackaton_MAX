@@ -18,10 +18,11 @@ type UniHandler struct {
 	logger      embedlog.Logger
 }
 
-func NewUniHandler(service *services.UniService, logger embedlog.Logger) *UniHandler {
+func NewUniHandler(uniService *services.UniService, userService *services.UserService, logger embedlog.Logger) *UniHandler {
 	return &UniHandler{
-		uniService: service,
-		logger:     logger,
+		userService: userService,
+		uniService:  uniService,
+		logger:      logger,
 	}
 }
 
@@ -94,7 +95,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /universities/semesters [post]
 // @Security     BearerAuth
-func (u *UniHandler) CreateNewNewSemesterPeriod(c echo.Context) error {
+func (u *UniHandler) CreateNewSemesterPeriod(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[CreateSemesters] CreateSemesters called")

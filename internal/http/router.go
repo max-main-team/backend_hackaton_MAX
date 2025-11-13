@@ -89,7 +89,7 @@ func NewRouter(logger embedlog.Logger, userHandler *handlers.UserHandler, authHa
 
 	uni.GET("/info", uniHandler.GetUniInfo)
 
-	uni.POST("/semesters", uniHandler.CreateNewNewSemesterPeriod)
+	uni.POST("/semesters", uniHandler.CreateNewSemesterPeriod)
 
 	// get info about all universities
 	uni.GET("/", uniHandler.GetAllUniversities)

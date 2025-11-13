@@ -75,7 +75,7 @@ func (a *App) initDependencies() {
 		a.cfg.APIKeys[api_key_bot],
 	)
 
-	a.uniHandler = handlers.NewUniHandler(uniService, a.sl)
+	a.uniHandler = handlers.NewUniHandler(uniService, userService, a.sl)
 
 	a.personsHandler = handlers.NewPersonalitiesHandler(personService, a.sl)
 	a.facultiesHandler = handlers.NewFaculHandler(faculService, a.sl)

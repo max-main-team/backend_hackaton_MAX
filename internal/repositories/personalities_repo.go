@@ -36,7 +36,7 @@ func (r *PersonalitiesRepo) RequestUniversityAccess(ctx context.Context, uniAcce
 	const qSendAccess = `
 		INSERT INTO users.persons_adds (
 			from_max_user_id,
-			to_max_user_id,
+			to_administration_id,
 			role_type
 		) 
 		SELECT 

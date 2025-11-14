@@ -121,7 +121,7 @@ func (r *PersonalitiesRepo) AddNewUser(ctx context.Context, request personalitie
 	switch request.UserType {
 	case personalities.Student:
 		qInsertUser = fmt.Sprintf(`
-			INSERT INTO users.students (
+			INSERT INTO personalities.students (
 			                            max_user_id,
 			                            university_department_id,
 			                            course_group_id
@@ -129,13 +129,13 @@ func (r *PersonalitiesRepo) AddNewUser(ctx context.Context, request personalitie
 		`, request.UserID, request.UniversityDepartmentID, request.CourseGroupID)
 	case personalities.Teacher:
 		qInsertUser = fmt.Sprintf(`
-			INSERT INTO users.teachers (
+			INSERT INTO personalities.teachers (
 			                            max_user_id
 			) VALUES (%d)
 	`, request.UserID)
 	case personalities.Admin:
 		qInsertUser = fmt.Sprintf(`
-		INSERT INTO users.administrations (
+		INSERT INTO personalities.administrations (
 		                                   max_user_id,
 		                                   university_id,
 		                                	faculty_id

@@ -15,6 +15,72 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/courses": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new course for a specific university department. Creates entry in universities.courses. Admin role required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create new course",
+                "parameters": [
+                    {
+                        "description": "Course data (start_date, end_date, university_department_id required)",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: course created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or missing required fields",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/department": {
             "post": {
                 "security": [
@@ -22,7 +88,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new department for a specific faculty and university. Admin role required.",
+                "description": "Create a new department and link it to a specific faculty and university. Creates entry in universities.departments and universities.university_departments. Admin role required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -35,7 +101,7 @@ const docTemplate = `{
                 "summary": "Create new department",
                 "parameters": [
                     {
-                        "description": "Department data",
+                        "description": "Department data (department_name required, department_code and alias_name optional)",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -154,7 +220,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new group for a specific department, faculty and university. Admin role required.",
+                "description": "Create a new course group for a specific course. Creates entry in groups.course_groups. Admin role required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -164,10 +230,10 @@ const docTemplate = `{
                 "tags": [
                     "admin"
                 ],
-                "summary": "Create new group",
+                "summary": "Create new course group",
                 "parameters": [
                     {
-                        "description": "Group data",
+                        "description": "Group data (group_name and course_id required)",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1140,6 +1206,25 @@ const docTemplate = `{
                 "message": {}
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateCourseRequest": {
+            "type": "object",
+            "required": [
+                "end_date",
+                "start_date",
+                "university_department_id"
+            ],
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "university_department_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateDepartmentRequest": {
             "type": "object",
             "required": [
@@ -1148,6 +1233,12 @@ const docTemplate = `{
                 "university_id"
             ],
             "properties": {
+                "alias_name": {
+                    "type": "string"
+                },
+                "department_code": {
+                    "type": "string"
+                },
                 "department_name": {
                     "type": "string"
                 },
@@ -1181,23 +1272,15 @@ const docTemplate = `{
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest": {
             "type": "object",
             "required": [
-                "department_id",
-                "faculty_id",
-                "group_name",
-                "university_id"
+                "course_id",
+                "group_name"
             ],
             "properties": {
-                "department_id": {
-                    "type": "integer"
-                },
-                "faculty_id": {
+                "course_id": {
                     "type": "integer"
                 },
                 "group_name": {
                     "type": "string"
-                },
-                "university_id": {
-                    "type": "integer"
                 }
             }
         },

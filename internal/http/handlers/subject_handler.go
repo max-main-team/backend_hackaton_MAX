@@ -58,7 +58,7 @@ func (h *SubjectHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
 	}
 	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
-		return s == "admin "
+		return s == "admin"
 	})
 	if !hasAdmin {
 		log.Errorf("[Create] GetUserRolesByID role admin not found")
@@ -168,7 +168,7 @@ func (h *SubjectHandler) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
 	}
 	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
-		return s == "admin "
+		return s == "admin"
 	})
 	if !hasAdmin {
 		log.Errorf("[Create] GetUserRolesByID role admin not found")

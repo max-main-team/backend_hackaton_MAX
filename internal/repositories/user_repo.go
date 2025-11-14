@@ -61,6 +61,32 @@ func (u *userRepository) CreateNewUser(ctx context.Context, user *models.User) e
 	return nil
 }
 
+func (u *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
+	query := `
+		UPDATE users.max_users_data 
+		SET first_name = $2,
+		    last_name = $3,
+		    username = $4,
+		    avatar_url = $5,
+		    full_avatar_url = $6
+		WHERE id = $1
+	`
+
+	_, err := u.pool.Exec(ctx, query,
+		user.ID,
+		user.FirstName,
+		toNullString(user.LastName),
+		toNullString(user.UserName),
+		toNullString(user.AvatarUrl),
+		toNullString(user.FullAvatarUrl))
+
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+
+	return nil
+}
+
 func (u *userRepository) GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error) {
 	var roles []string
 	query :=

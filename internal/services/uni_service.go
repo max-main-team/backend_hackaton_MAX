@@ -101,21 +101,37 @@ func (u *UniService) CreateNewDepartment(ctx context.Context, departmentName, de
 	return nil
 }
 
-func (u *UniService) CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error {
+func (u *UniService) CreateNewCourse(ctx context.Context, startDate, endDate time.Time, universityDepartmentID int64) error {
+	if startDate.IsZero() {
+		return fmt.Errorf("start date cannot be empty")
+	}
+	if endDate.IsZero() {
+		return fmt.Errorf("end date cannot be empty")
+	}
+	if endDate.Before(startDate) {
+		return fmt.Errorf("end date must be after start date")
+	}
+	if universityDepartmentID <= 0 {
+		return fmt.Errorf("invalid university department ID")
+	}
+
+	err := u.uniRepo.CreateNewCourse(ctx, startDate, endDate, universityDepartmentID)
+	if err != nil {
+		return fmt.Errorf("failed to create course: %w", err)
+	}
+
+	return nil
+}
+
+func (u *UniService) CreateNewGroup(ctx context.Context, groupName string, courseID int64) error {
 	if groupName == "" {
 		return fmt.Errorf("group name cannot be empty")
 	}
-	if departmentID <= 0 {
-		return fmt.Errorf("invalid department ID")
-	}
-	if facultyID <= 0 {
-		return fmt.Errorf("invalid faculty ID")
-	}
-	if universityID <= 0 {
-		return fmt.Errorf("invalid university ID")
+	if courseID <= 0 {
+		return fmt.Errorf("invalid course ID")
 	}
 
-	err := u.uniRepo.CreateNewGroup(ctx, groupName, departmentID, facultyID, universityID)
+	err := u.uniRepo.CreateNewGroup(ctx, groupName, courseID)
 	if err != nil {
 		return fmt.Errorf("failed to create group: %w", err)
 	}

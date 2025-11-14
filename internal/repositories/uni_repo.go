@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -154,13 +155,27 @@ func (u *uniRepository) CreateNewDepartment(ctx context.Context, departmentName,
 	return nil
 }
 
-func (u *uniRepository) CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error {
+func (u *uniRepository) CreateNewCourse(ctx context.Context, startDate, endDate time.Time, universityDepartmentID int64) error {
 	query := `
-		INSERT INTO universities.course_groups (name, university_department_id, faculty_id, university_id)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO universities.courses (start_date, end_date, university_department_id)
+		VALUES ($1, $2, $3)
 	`
 
-	_, err := u.pool.Exec(ctx, query, groupName, departmentID, facultyID, universityID)
+	_, err := u.pool.Exec(ctx, query, startDate, endDate, universityDepartmentID)
+	if err != nil {
+		return fmt.Errorf("failed to create course: %w", err)
+	}
+
+	return nil
+}
+
+func (u *uniRepository) CreateNewGroup(ctx context.Context, groupName string, courseID int64) error {
+	query := `
+		INSERT INTO groups.course_groups (name, course_id)
+		VALUES ($1, $2)
+	`
+
+	_, err := u.pool.Exec(ctx, query, groupName, courseID)
 	if err != nil {
 		return fmt.Errorf("failed to create group: %w", err)
 	}

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"time"
 
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
@@ -13,6 +14,7 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, id int64) (*models.User, error)
 	GetUserRolesByID(ctx context.Context, id int64) (*models.UserRoles, error)
 	CreateNewUser(ctx context.Context, user *models.User) error
+	UpdateUser(ctx context.Context, user *models.User) error
 }
 
 type RefreshTokenRepository interface {
@@ -31,7 +33,9 @@ type UniRepository interface {
 
 	CreateNewDepartment(ctx context.Context, departmentName, departmentCode, aliasName string, facultyID, universityID int64) error
 
-	CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error
+	CreateNewCourse(ctx context.Context, startDate, endDate time.Time, universityDepartmentID int64) error
+
+	CreateNewGroup(ctx context.Context, groupName string, courseID int64) error
 
 	CreateNewEvent(ctx context.Context, event models.Event) error
 

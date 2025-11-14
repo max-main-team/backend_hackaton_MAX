@@ -254,13 +254,99 @@ func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"status": "department created successfully"})
 }
 
-// CreateNewGroup godoc
-// @Summary      Create new group
-// @Description  Create a new group for a specific department, faculty and university. Admin role required.
+// CreateNewCourse godoc
+// @Summary      Create new course
+// @Description  Create a new course for a specific university department. Creates entry in universities.courses. Admin role required.
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param        request  body   dto.CreateGroupRequest  true  "Group data"
+// @Param        request  body   dto.CreateCourseRequest  true  "Course data (start_date, end_date, university_department_id required)"
+// @Success      200   {object}  map[string]string  "status: course created successfully"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body or missing required fields"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      403   {object}  echo.HTTPError  "Forbidden - user is not admin"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /admin/courses [post]
+// @Security     BearerAuth
+func (u *UniHandler) CreateNewCourse(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[CreateNewCourse] CreateNewCourse called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[CreateNewCourse] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[CreateNewCourse] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+	}
+
+	isAdmin := false
+	for _, role := range roles.Roles {
+		if role == "admin" {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		log.Errorf("[CreateNewCourse] permission denied for user id %d", currentUser.ID)
+		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
+	}
+
+	var req dto.CreateCourseRequest
+
+	if err := c.Bind(&req); err != nil {
+		log.Errorf("[CreateNewCourse] failed to decode request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request format")
+	}
+
+	if req.StartDate == "" {
+		log.Errorf("[CreateNewCourse] start date is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "start date is required")
+	}
+
+	if req.EndDate == "" {
+		log.Errorf("[CreateNewCourse] end date is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "end date is required")
+	}
+
+	if req.UniversityDepartment <= 0 {
+		log.Errorf("[CreateNewCourse] university department ID is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "university department ID is required")
+	}
+
+	startDate, err := time.Parse("2006-01-02", req.StartDate)
+	if err != nil {
+		log.Errorf("[CreateNewCourse] invalid start date format: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid start date format, use YYYY-MM-DD")
+	}
+
+	endDate, err := time.Parse("2006-01-02", req.EndDate)
+	if err != nil {
+		log.Errorf("[CreateNewCourse] invalid end date format: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid end date format, use YYYY-MM-DD")
+	}
+
+	err = u.uniService.CreateNewCourse(context.TODO(), startDate, endDate, req.UniversityDepartment)
+	if err != nil {
+		log.Errorf("[CreateNewCourse] failed to create new course: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new course")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"status": "course created successfully"})
+}
+
+// CreateNewGroup godoc
+// @Summary      Create new course group
+// @Description  Create a new course group for a specific course. Creates entry in groups.course_groups. Admin role required.
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        request  body   dto.CreateGroupRequest  true  "Group data (group_name and course_id required)"
 // @Success      200   {object}  map[string]string  "status: group created successfully"
 // @Failure      400   {object}  echo.HTTPError  "Invalid request body or missing required fields"
 // @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
@@ -309,7 +395,12 @@ func (u *UniHandler) CreateNewGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "group name is required")
 	}
 
-	err = u.uniService.CreateNewGroup(context.TODO(), req.GroupName, req.DepartmentID, req.FacultyID, req.UniversityID)
+	if req.CourseID <= 0 {
+		log.Errorf("[CreateNewGroup] course ID is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "course ID is required")
+	}
+
+	err = u.uniService.CreateNewGroup(context.TODO(), req.GroupName, req.CourseID)
 	if err != nil {
 		log.Errorf("[CreateNewGroup] failed to create new group: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new group")

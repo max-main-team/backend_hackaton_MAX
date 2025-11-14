@@ -117,8 +117,23 @@ func (h *AuthHandler) Login(c echo.Context) error {
 			}
 			user = newUser
 			log.Printf("[Login] Created new user with ID: %d", user.ID)
+		} else {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find user. err: "+err.Error())
 		}
-		return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find user. err: "+err.Error())
+	} else {
+		// Пользователь существует - обновляем его данные
+		user.FirstName = userData.FirstName
+		user.LastName = &userData.LastName
+		user.UserName = userData.Username
+		user.AvatarUrl = userData.PhotoURL
+		user.FullAvatarUrl = userData.PhotoURL
+
+		err = h.userRepo.UpdateUser(context.TODO(), user)
+		if err != nil {
+			log.Errorf("[Login] Failed to update user data. err: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update user data")
+		}
+		log.Printf("[Login] Updated user data for ID: %d", user.ID)
 	}
 
 	access, refresh, err := h.jwtService.GenerateTokenPair(

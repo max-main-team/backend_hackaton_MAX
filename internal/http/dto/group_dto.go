@@ -9,8 +9,6 @@ type GroupInfoResponse struct {
 }
 
 type CreateGroupRequest struct {
-	GroupName    string `json:"group_name" validate:"required"`
-	DepartmentID int64  `json:"department_id" validate:"required"`
-	FacultyID    int64  `json:"faculty_id" validate:"required"`
-	UniversityID int64  `json:"university_id" validate:"required"`
+	GroupName string `json:"group_name" validate:"required"`
+	CourseID  int64  `json:"course_id" validate:"required"`
 }

@@ -329,7 +329,6 @@ func (r *PersonalitiesRepo) GetAllStudentsForGroup(ctx context.Context, groupID 
 
 	return result, nil
 }
-
 func (r *PersonalitiesRepo) GetAllTeachersForUniversity(ctx context.Context, universityID int64) ([]models.User, error) {
 	const qGetAllTeachersForUniversity = `
 		SELECT DISTINCT
@@ -338,7 +337,7 @@ func (r *PersonalitiesRepo) GetAllTeachersForUniversity(ctx context.Context, uni
 			u.last_name,
 			u.username,
 			u.is_bot,
-			COALESCE(EXTRACT(EPOCH FROM u.last_activity)::int, 0) as last_activity_time,
+			COALESCE(u.last_activity, 0) as last_activity_time,
 			u.description,
 			u.avatar_url,
 			u.full_avatar_url

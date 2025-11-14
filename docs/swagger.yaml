@@ -119,6 +119,9 @@ definitions:
       id:
         example: 123456789
         type: integer
+      photo_url:
+        example: https://itmo.ru/images/itmo.jpg
+        type: string
       site_url:
         example: https://itmo.ru
         type: string
@@ -820,6 +823,55 @@ paths:
       summary: create subject for university
       tags:
       - subjects
+  /universities/:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all universities with their detailed information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of universities
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse'
+            type: array
+        "500":
+          description: Internal server error - failed to get universities
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get all universities
+      tags:
+      - universities
+  /universities/info:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about the university associated with the
+        authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: University information
+          schema:
+            $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse'
+        "401":
+          description: Unauthorized - user not authenticated
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error - failed to get university info
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get university information for current user
+      tags:
+      - universities
   /universities/semesters:
     post:
       consumes:

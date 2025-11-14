@@ -61,12 +61,22 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 		Name:        uniInfo.Name,
 		ShortName:   uniInfo.ShortName,
 		City:        uniInfo.City,
-		SiteUrl:     *uniInfo.SiteUrl,
-		Description: *uniInfo.Description,
-		PhotoUrl:    *uniInfo.PhotoUrl,
+		SiteUrl:     NewString(uniInfo.SiteUrl),
+		Description: NewString(uniInfo.Description),
+		PhotoUrl:    NewString(uniInfo.PhotoUrl),
 	})
 }
 
+// GetAllUniversities godoc
+// @Summary      Get all universities
+// @Description  Get a list of all universities with their detailed information
+// @Tags         universities
+// @Accept       json
+// @Produce      json
+// @Success      200   {array}   dto.UniInfoResponse  "List of universities"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error - failed to get universities"
+// @Router       /universities/ [get]
+// @Security     BearerAuth
 func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)

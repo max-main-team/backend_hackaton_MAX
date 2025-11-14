@@ -882,6 +882,83 @@ const docTemplate = `{
                 }
             }
         },
+        "/universities/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a list of all universities with their detailed information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Get all universities",
+                "responses": {
+                    "200": {
+                        "description": "List of universities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - failed to get universities",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/universities/info": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get detailed information about the university associated with the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Get university information for current user",
+                "responses": {
+                    "200": {
+                        "description": "University information",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - user not authenticated",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error - failed to get university info",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/universities/semesters": {
             "post": {
                 "security": [
@@ -1125,6 +1202,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 123456789
+                },
+                "photo_url": {
+                    "type": "string",
+                    "example": "https://itmo.ru/images/itmo.jpg"
                 },
                 "site_url": {
                     "type": "string",

@@ -63,7 +63,7 @@ func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit,
 			u.role_type as role,
 			mu.first_name as first_name,
 			mu.last_name as last_name,
-			mu.username as username,
+			mu.username as username
 		FROM users.persons_adds as u
 		JOIN users.max_users_data mu on mu.id = u.from_max_user_id
 		WHERE u.to_administration_id = 

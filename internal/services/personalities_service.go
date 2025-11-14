@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
 	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/repositories"
@@ -62,4 +63,52 @@ func (s *PersonalitiesService) AcceptAccess(ctx context.Context, request persona
 		return err
 	}
 	return nil
+}
+
+func (s *PersonalitiesService) GetAllUniversitiesForPerson(ctx context.Context, userID int64) ([]models.UniversitiesData, error) {
+	universities, err := s.PersonsRepo.GetAllUniversitiesForPerson(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return universities, nil
+}
+
+func (s *PersonalitiesService) GetAllFacultiesForUniversity(ctx context.Context, universityID int64) ([]models.Faculties, error) {
+	faculties, err := s.PersonsRepo.GetAllFacultiesForUniversity(ctx, universityID)
+	if err != nil {
+		return nil, err
+	}
+	return faculties, nil
+}
+
+func (s *PersonalitiesService) GetAllDepartmentsForFaculty(ctx context.Context, facultyID int64) ([]models.Departments, error) {
+	departments, err := s.PersonsRepo.GetAllDepartmentsForFaculty(ctx, facultyID)
+	if err != nil {
+		return nil, err
+	}
+	return departments, nil
+}
+
+func (s *PersonalitiesService) GetAllGroupsForDepartment(ctx context.Context, departmentID int64) ([]models.Groups, error) {
+	groups, err := s.PersonsRepo.GetAllGroupsForDepartment(ctx, departmentID)
+	if err != nil {
+		return nil, err
+	}
+	return groups, nil
+}
+
+func (s *PersonalitiesService) GetAllStudentsForGroup(ctx context.Context, groupID int64) ([]models.User, error) {
+	students, err := s.PersonsRepo.GetAllStudentsForGroup(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	return students, nil
+}
+
+func (s *PersonalitiesService) GetAllTeachersForUniversity(ctx context.Context, universityID int64) ([]models.User, error) {
+	teachers, err := s.PersonsRepo.GetAllTeachersForUniversity(ctx, universityID)
+	if err != nil {
+		return nil, err
+	}
+	return teachers, nil
 }

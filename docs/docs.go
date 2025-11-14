@@ -242,7 +242,64 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/subjects": {
+        "/subjects": {
+            "get": {
+                "description": "get all subjects for university by university ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subjects"
+                ],
+                "summary": "get all subjects by university ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "limit of requests max(50), default(5)",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "offset default(0)",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Requests for administration",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.SubjectsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "handler that provide creation of subject for university",
                 "consumes": [
@@ -483,6 +540,28 @@ const docTemplate = `{
                 },
                 "university_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.SubjectsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "has_more": {
+                    "type": "boolean"
                 }
             }
         },

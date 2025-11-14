@@ -6,6 +6,7 @@ import (
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/subjects"
 )
 
 type UserRepository interface {
@@ -42,4 +43,5 @@ type FaculRepository interface {
 
 type SubjectsRepository interface {
 	Create(ctx context.Context, name string, uniID int64) error
+	Get(ctx context.Context, uniID, limit, offset int64) (*subjects.Subjects, error)
 }

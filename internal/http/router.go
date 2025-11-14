@@ -109,8 +109,9 @@ func NewRouter(logger embedlog.Logger,
 	persons.POST("/access/accept", personsHandler.AcceptAccess)
 
 	// subjects
-	subjects := admin.Group("/subjects")
+	subjects := protected.Group("/subjects")
 	subjects.POST("", subjectsHandler.Create)
+	subjects.GET("", subjectsHandler.Get)
 
 	return e
 }

@@ -82,6 +82,20 @@ definitions:
       university_id:
         type: integer
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.SubjectsResponse:
+    properties:
+      data:
+        items:
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+          type: object
+        type: array
+      has_more:
+        type: boolean
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType:
     enum:
     - student
@@ -253,7 +267,46 @@ paths:
       summary: Accept Request for adding in University
       tags:
       - personalities
-  /admin/subjects:
+  /subjects:
+    get:
+      consumes:
+      - application/json
+      description: get all subjects for university by university ID
+      parameters:
+      - default: 5
+        description: limit of requests max(50), default(5)
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 0
+        description: offset default(0)
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Requests for administration
+          schema:
+            $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.SubjectsResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: get all subjects by university ID
+      tags:
+      - subjects
     post:
       consumes:
       - application/json

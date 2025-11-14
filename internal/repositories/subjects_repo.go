@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/subjects"
 )
 
 type SubjectRepo struct {
@@ -39,4 +40,34 @@ func (r *SubjectRepo) Create(ctx context.Context, name string, uniID int64) erro
 	}
 
 	return nil
+}
+
+func (r *SubjectRepo) Get(ctx context.Context, uniID, limit, offset int64) (*subjects.Subjects, error) {
+	const qGetSubjects = `
+		SELECT 
+			s.id,
+			s.name
+		FROM subjects.university_subjects as s
+		WHERE s.university_id = $1
+	`
+
+	rows, err := r.pool.Query(ctx, qGetSubjects, uniID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var subs subjects.Subjects
+
+	for rows.Next() {
+		var s subjects.Subject
+		err = rows.Scan(&s.ID, &s.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		subs.Data = append(subs.Data, s)
+	}
+
+	return &subs, nil
 }

@@ -62,7 +62,8 @@ func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit,
 			from_max_user_id as user_id,
 			role_type as role
 		FROM users.persons_adds as u
-		WHERE u.to_administration_id = $1
+		WHERE u.to_administration_id = 
+		      (select a.id from personalities.administrations a where a.max_user_id = $1)
 		ORDER BY user_id ASC
 		LIMIT $2 OFFSET $3
 	`

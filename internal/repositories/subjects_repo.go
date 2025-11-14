@@ -71,3 +71,16 @@ func (r *SubjectRepo) Get(ctx context.Context, uniID, limit, offset int64) (*sub
 
 	return &subs, nil
 }
+
+func (r *SubjectRepo) Delete(ctx context.Context, id int64) error {
+
+	qDeleteSubject := `DELETE FROM subjects.university_subjects WHERE id = $1`
+
+	_, err := r.pool.Exec(ctx, qDeleteSubject, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

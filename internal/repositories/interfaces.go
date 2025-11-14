@@ -44,4 +44,5 @@ type FaculRepository interface {
 type SubjectsRepository interface {
 	Create(ctx context.Context, name string, uniID int64) error
 	Get(ctx context.Context, uniID, limit, offset int64) (*subjects.Subjects, error)
+	Delete(ctx context.Context, id int64) error
 }

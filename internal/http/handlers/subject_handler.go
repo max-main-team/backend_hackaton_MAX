@@ -138,3 +138,60 @@ func (h *SubjectHandler) Get(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, subs)
 }
+
+// Delete godoc
+// @Summary      delete subject
+// @Description  get subject by subject ID
+// @Tags         subjects
+// @Accept       json
+// @Produce      json
+// @Param        subject_id  query   int  true  "subject ID"
+// @Success      200   {object}  string "ok"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /subjects [delete]
+func (h *SubjectHandler) Delete(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[Delete] Delete subject called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[Delete] User not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	roles, err := h.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[Create] GetUserRolesByID error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
+	}
+	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
+		return s == "admin "
+	})
+	if !hasAdmin {
+		log.Errorf("[Create] GetUserRolesByID role admin not found")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
+	}
+
+	subject := c.Param("subject_id")
+	if subject == "" {
+		log.Errorf("[Delete] Get subject id error: %v", subject)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid subject id")
+	}
+
+	subjectID, err := strconv.ParseInt(subject, 10, 64)
+	if err != nil {
+		log.Errorf("[Delete] Parse subject id error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid subject id")
+	}
+
+	err = h.subjectService.Delete(context.TODO(), subjectID)
+	if err != nil {
+		log.Errorf("[Delete] Delete subject error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete subject")
+	}
+
+	return c.JSON(http.StatusOK, "ok")
+}

@@ -274,6 +274,38 @@ paths:
       tags:
       - personalities
   /subjects:
+    delete:
+      consumes:
+      - application/json
+      description: get subject by subject ID
+      parameters:
+      - description: subject ID
+        in: query
+        name: subject_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: delete subject
+      tags:
+      - subjects
     get:
       consumes:
       - application/json

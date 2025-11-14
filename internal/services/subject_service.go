@@ -54,3 +54,8 @@ func (s *SubjectService) Get(ctx context.Context, request subjects.GetSubjectsRe
 
 	return &response, nil
 }
+
+func (s *SubjectService) Delete(ctx context.Context, subjectID int64) error {
+	err := s.subjectsRepo.Delete(ctx, subjectID)
+	return err
+}

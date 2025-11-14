@@ -112,6 +112,7 @@ func NewRouter(logger embedlog.Logger,
 	subjects := protected.Group("/subjects")
 	subjects.POST("", subjectsHandler.Create)
 	subjects.GET("", subjectsHandler.Get)
+	subjects.DELETE("", subjectsHandler.Delete)
 
 	return e
 }

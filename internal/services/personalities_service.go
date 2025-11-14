@@ -54,8 +54,11 @@ func (s *PersonalitiesService) GetAccessRequest(ctx context.Context, userID, lim
 	}
 
 	response.Data = []struct {
-		UserID   int64                   `json:"user_id"`
-		UserType personalities2.RoleType `json:"role"`
+		UserID    int64                   `json:"user_id"`
+		UserType  personalities2.RoleType `json:"role"`
+		FirstName string                  `json:"first_name"`
+		LastName  *string                 `json:"last_name,omitempty"`
+		Username  *string                 `json:"username,omitempty"`
 	}(accesses.Requests[:limit])
 
 	return &response, nil

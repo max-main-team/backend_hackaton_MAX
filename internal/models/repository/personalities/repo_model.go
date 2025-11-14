@@ -21,7 +21,10 @@ type PaginationParams struct {
 
 type AccessRequests struct {
 	Requests []struct {
-		UserID   int64
-		UserType RoleType
+		UserID    int64
+		UserType  RoleType
+		FirstName string
+		LastName  *string
+		Username  *string
 	}
 }

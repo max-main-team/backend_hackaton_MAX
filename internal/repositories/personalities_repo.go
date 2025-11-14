@@ -59,9 +59,13 @@ func (r *PersonalitiesRepo) RequestUniversityAccess(ctx context.Context, uniAcce
 func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error) {
 	const qGetAccessByUser = `
 		SELECT
-			from_max_user_id as user_id,
-			role_type as role
+			u.from_max_user_id as user_id,
+			u.role_type as role,
+			mu.first_name as first_name,
+			mu.last_name as last_name,
+			mu.username as username,
 		FROM users.persons_adds as u
+		JOIN users.max_users_data mu on mu.id = u.from_max_user_id
 		WHERE u.to_administration_id = 
 		      (select a.id from personalities.administrations a where a.max_user_id = $1)
 		ORDER BY user_id ASC
@@ -78,13 +82,21 @@ func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit,
 	for rows.Next() {
 		var userID int64
 		var roleType personalities.RoleType
-		if err := rows.Scan(&userID, &roleType); err != nil {
+		var (
+			firstName string
+			lastName,
+			username *string
+		)
+		if err := rows.Scan(&userID, &roleType, &firstName, &lastName, &username); err != nil {
 			return personalities.AccessRequests{}, err
 		}
 		result.Requests = append(result.Requests, struct {
-			UserID   int64
-			UserType personalities.RoleType
-		}{userID, roleType})
+			UserID    int64
+			UserType  personalities.RoleType
+			FirstName string
+			LastName  *string
+			Username  *string
+		}{userID, roleType, firstName, lastName, username})
 	}
 
 	return result, nil

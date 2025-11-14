@@ -149,6 +149,11 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 		log.Errorf("[GetRequests] failed to get access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	if response == nil {
+		response = &personalities2.AccessRequestResponse{
+			HasMore: false,
+		}
+	}
 
 	return c.JSON(http.StatusOK, response)
 }

@@ -37,9 +37,9 @@ func (s *SubjectService) Get(ctx context.Context, request subjects.GetSubjectsRe
 		response.HasMore = true
 	}
 
-	if int64(len(subs.Data)) < limit {
-		limit = int64(len(subs.Data))
-	}
+	// if int64(len(subs.Data)) < limit {
+	// 	limit = int64(len(subs.Data))
+	// }
 
 	if len(subs.Data) == 0 {
 		return &response, nil

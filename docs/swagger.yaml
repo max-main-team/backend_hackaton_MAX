@@ -24,6 +24,48 @@ definitions:
     - periods
     - uni_id
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.DepartmentInfoResponse:
+    properties:
+      code:
+        example: 09.03.02
+        type: string
+      department_name:
+        example: Sowtware Engineering
+        type: string
+      faculty_name:
+        example: FITIP
+        type: string
+      id:
+        example: 123456789
+        type: integer
+    required:
+    - code
+    - department_name
+    - faculty_name
+    - id
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      university_name:
+        type: string
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.GroupInfoResponse:
+    properties:
+      code:
+        type: string
+      course_id:
+        type: integer
+      department_name:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod:
     properties:
       end_date:
@@ -35,6 +77,56 @@ definitions:
     required:
     - end_date
     - start_date
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse:
+    properties:
+      city:
+        example: Saint-Petersburg
+        type: string
+      description:
+        example: One of the leading Russian universities in the field of information
+          technology, optical design, and engineering.
+        type: string
+      id:
+        example: 123456789
+        type: integer
+      site_url:
+        example: https://itmo.ru
+        type: string
+      uni_name:
+        example: ITMO University
+        type: string
+      uni_short_name:
+        example: ITMO
+        type: string
+    required:
+    - city
+    - id
+    - uni_name
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User:
+    properties:
+      first_name:
+        example: John
+        type: string
+      id:
+        example: 123456789
+        type: integer
+      language_code:
+        example: ru
+        type: string
+      last_name:
+        example: Doe
+        type: string
+      photo_url:
+        example: https://example.com/photo.jpg
+        type: string
+      username:
+        example: johndoe
+        type: string
+    required:
+    - first_name
+    - id
     type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AcceptAccessRequest:
     properties:
@@ -271,6 +363,207 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: Accept Request for adding in University
+      tags:
+      - personalities
+  /personalities/departments:
+    get:
+      consumes:
+      - application/json
+      description: Get all departments for faculty by faculty ID
+      parameters:
+      - description: Faculty ID
+        in: query
+        name: faculty_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Departments
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.DepartmentInfoResponse'
+            type: array
+        "400":
+          description: Invalid request parameter
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all departments for faculty
+      tags:
+      - personalities
+  /personalities/faculty:
+    get:
+      consumes:
+      - application/json
+      description: Get all faculties for university by university ID
+      parameters:
+      - description: University ID
+        in: query
+        name: university_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Faculties
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse'
+            type: array
+        "400":
+          description: Invalid request parameter
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all faculties for university
+      tags:
+      - personalities
+  /personalities/groups:
+    get:
+      consumes:
+      - application/json
+      description: Get all course groups for department by department ID
+      parameters:
+      - description: Department ID
+        in: query
+        name: department_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Groups
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.GroupInfoResponse'
+            type: array
+        "400":
+          description: Invalid request parameter
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all groups for department
+      tags:
+      - personalities
+  /personalities/student:
+    get:
+      consumes:
+      - application/json
+      description: Get all students for course group by group ID
+      parameters:
+      - description: Course Group ID
+        in: query
+        name: group_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Students
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User'
+            type: array
+        "400":
+          description: Invalid request parameter
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all students for group
+      tags:
+      - personalities
+  /personalities/teachers:
+    get:
+      consumes:
+      - application/json
+      description: Get all teachers for university by university ID
+      parameters:
+      - description: University ID
+        in: query
+        name: university_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Teachers
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User'
+            type: array
+        "400":
+          description: Invalid request parameter
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all teachers for university
+      tags:
+      - personalities
+  /personalities/universities:
+    get:
+      consumes:
+      - application/json
+      description: Get all universities where the authenticated user has access (as
+        admin or student)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Universities
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse'
+            type: array
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get all universities for authenticated person
       tags:
       - personalities
   /subjects:

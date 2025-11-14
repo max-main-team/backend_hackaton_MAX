@@ -242,6 +242,309 @@ const docTemplate = `{
                 }
             }
         },
+        "/personalities/departments": {
+            "get": {
+                "description": "Get all departments for faculty by faculty ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Get all departments for faculty",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Faculty ID",
+                        "name": "faculty_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Departments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.DepartmentInfoResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameter",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/personalities/faculty": {
+            "get": {
+                "description": "Get all faculties for university by university ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Get all faculties for university",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "University ID",
+                        "name": "university_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Faculties",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameter",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/personalities/groups": {
+            "get": {
+                "description": "Get all course groups for department by department ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Get all groups for department",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Department ID",
+                        "name": "department_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Groups",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.GroupInfoResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameter",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/personalities/student": {
+            "get": {
+                "description": "Get all students for course group by group ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Get all students for group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Course Group ID",
+                        "name": "group_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Students",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameter",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/personalities/teachers": {
+            "get": {
+                "description": "Get all teachers for university by university ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Get all teachers for university",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "University ID",
+                        "name": "university_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Teachers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameter",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/personalities/universities": {
+            "get": {
+                "description": "Get all universities where the authenticated user has access (as admin or student)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "Get all universities for authenticated person",
+                "responses": {
+                    "200": {
+                        "description": "Universities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/subjects": {
             "get": {
                 "description": "get all subjects for university by university ID",
@@ -503,6 +806,67 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.DepartmentInfoResponse": {
+            "type": "object",
+            "required": [
+                "code",
+                "department_name",
+                "faculty_name",
+                "id"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "09.03.02"
+                },
+                "department_name": {
+                    "type": "string",
+                    "example": "Sowtware Engineering"
+                },
+                "faculty_name": {
+                    "type": "string",
+                    "example": "FITIP"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 123456789
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "university_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.GroupInfoResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "course_id": {
+                    "type": "integer"
+                },
+                "department_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod": {
             "type": "object",
             "required": [
@@ -517,6 +881,73 @@ const docTemplate = `{
                 "start_date": {
                     "type": "string",
                     "example": "2005-12-23T00:00:00Z"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UniInfoResponse": {
+            "type": "object",
+            "required": [
+                "city",
+                "id",
+                "uni_name"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "example": "Saint-Petersburg"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "One of the leading Russian universities in the field of information technology, optical design, and engineering."
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 123456789
+                },
+                "site_url": {
+                    "type": "string",
+                    "example": "https://itmo.ru"
+                },
+                "uni_name": {
+                    "type": "string",
+                    "example": "ITMO University"
+                },
+                "uni_short_name": {
+                    "type": "string",
+                    "example": "ITMO"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "id"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 123456789
+                },
+                "language_code": {
+                    "type": "string",
+                    "example": "ru"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "photo_url": {
+                    "type": "string",
+                    "example": "https://example.com/photo.jpg"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "johndoe"
                 }
             }
         },

@@ -358,7 +358,6 @@ func (h *AuthHandler) CheckToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-
 // Авторизация:  ✅(Миша)
 
 // Администрация:
@@ -387,7 +386,7 @@ func (h *AuthHandler) CheckToken(c echo.Context) error {
 // 3) Добавление оценок POST  									    ⛔️(?)
 
 // Общее для преподавателей и студентов:
-// Персоналити: 
+// Персоналити:
 // 0) Выбор вуза (для случаев, если у студентов 2 вуза)  		POST personalities/uni				☑️(Миша)
 // 1) Просмотр факультетов для конкретного вуpf ET              ☑️(Миша)
 // 2) Просмотр направлений GET            ☑️(Миша)

@@ -507,11 +507,20 @@ const docTemplate = `{
                     "items": {
                         "type": "object",
                         "properties": {
+                            "first_name": {
+                                "type": "string"
+                            },
+                            "last_name": {
+                                "type": "string"
+                            },
                             "role": {
                                 "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType"
                             },
                             "user_id": {
                                 "type": "integer"
+                            },
+                            "username": {
+                                "type": "string"
                             }
                         }
                     }

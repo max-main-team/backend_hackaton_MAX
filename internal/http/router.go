@@ -123,5 +123,12 @@ func NewRouter(logger embedlog.Logger,
 	subjects.GET("", subjectsHandler.Get)
 	subjects.DELETE("", subjectsHandler.Delete)
 
+	// department
+	department := admin.Group("/department")
+	department.POST("", uniHandler.CreateNewDepartment)
+
+	// groups
+	groups := admin.Group("/groups")
+	groups.POST("", uniHandler.CreateNewGroup)
 	return e
 }

@@ -15,6 +15,72 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/department": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new department for a specific faculty and university. Admin role required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create new department",
+                "parameters": [
+                    {
+                        "description": "Department data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateDepartmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: department created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or missing required fields",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/faculties": {
             "post": {
                 "security": [
@@ -62,6 +128,72 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized - missing or invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/groups": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new group for a specific department, faculty and university. Admin role required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create new group",
+                "parameters": [
+                    {
+                        "description": "Group data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: group created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or missing required fields",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -822,6 +954,48 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {}
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateDepartmentRequest": {
+            "type": "object",
+            "required": [
+                "department_name",
+                "faculty_id",
+                "university_id"
+            ],
+            "properties": {
+                "department_name": {
+                    "type": "string"
+                },
+                "faculty_id": {
+                    "type": "integer"
+                },
+                "university_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest": {
+            "type": "object",
+            "required": [
+                "department_id",
+                "faculty_id",
+                "group_name",
+                "university_id"
+            ],
+            "properties": {
+                "department_id": {
+                    "type": "integer"
+                },
+                "faculty_id": {
+                    "type": "integer"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "university_id": {
+                    "type": "integer"
+                }
             }
         },
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateNewFacultyRequest": {

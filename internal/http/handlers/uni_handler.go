@@ -164,3 +164,131 @@ func ConvertDtoModel(dto []dto.SemesterPeriod) ([]models.SemesterPeriod, error) 
 	}
 	return out, nil
 }
+
+// CreateNewDepartment godoc
+// @Summary      Create new department
+// @Description  Create a new department for a specific faculty and university. Admin role required.
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        request  body   dto.CreateDepartmentRequest  true  "Department data"
+// @Success      200   {object}  map[string]string  "status: department created successfully"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body or missing required fields"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      403   {object}  echo.HTTPError  "Forbidden - user is not admin"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /admin/department [post]
+// @Security     BearerAuth
+func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[CreateNewDepartment] CreateNewDepartment called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[CreateNewDepartment] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[CreateNewDepartment] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+	}
+
+	isAdmin := false
+	for _, role := range roles.Roles {
+		if role == "admin" {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		log.Errorf("[CreateNewDepartment] permission denied for user id %d", currentUser.ID)
+		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
+	}
+
+	var req dto.CreateDepartmentRequest
+
+	if err := c.Bind(&req); err != nil {
+		log.Errorf("[CreateNewDepartment] failed to decode request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request format")
+	}
+
+	if req.DepartmentName == "" {
+		log.Errorf("[CreateNewDepartment] department name is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "department name is required")
+	}
+
+	err = u.uniService.CreateNewDepartment(context.TODO(), req.DepartmentName, req.FacultyID, req.UniversityID)
+	if err != nil {
+		log.Errorf("[CreateNewDepartment] failed to create new department: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new department")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"status": "department created successfully"})
+}
+
+// CreateNewGroup godoc
+// @Summary      Create new group
+// @Description  Create a new group for a specific department, faculty and university. Admin role required.
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        request  body   dto.CreateGroupRequest  true  "Group data"
+// @Success      200   {object}  map[string]string  "status: group created successfully"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body or missing required fields"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      403   {object}  echo.HTTPError  "Forbidden - user is not admin"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /admin/groups [post]
+// @Security     BearerAuth
+func (u *UniHandler) CreateNewGroup(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[CreateNewGroup] CreateNewGroup called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[CreateNewGroup] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[CreateNewGroup] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+	}
+
+	isAdmin := false
+	for _, role := range roles.Roles {
+		if role == "admin" {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		log.Errorf("[CreateNewGroup] permission denied for user id %d", currentUser.ID)
+		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
+	}
+
+	var req dto.CreateGroupRequest
+
+	if err := c.Bind(&req); err != nil {
+		log.Errorf("[CreateNewGroup] failed to decode request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request format")
+	}
+
+	if req.GroupName == "" {
+		log.Errorf("[CreateNewGroup] group name is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "group name is required")
+	}
+
+	err = u.uniService.CreateNewGroup(context.TODO(), req.GroupName, req.DepartmentID, req.FacultyID, req.UniversityID)
+	if err != nil {
+		log.Errorf("[CreateNewGroup] failed to create new group: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new group")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"status": "group created successfully"})
+}

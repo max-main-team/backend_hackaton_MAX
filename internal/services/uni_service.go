@@ -81,3 +81,44 @@ func ValidateSemesters(periods []models.SemesterPeriod) error {
 
 	return nil
 }
+
+func (u *UniService) CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error {
+	if departmentName == "" {
+		return fmt.Errorf("department name cannot be empty")
+	}
+	if facultyID <= 0 {
+		return fmt.Errorf("invalid faculty ID")
+	}
+	if universityID <= 0 {
+		return fmt.Errorf("invalid university ID")
+	}
+
+	err := u.uniRepo.CreateNewDepartment(ctx, departmentName, facultyID, universityID)
+	if err != nil {
+		return fmt.Errorf("failed to create department: %w", err)
+	}
+
+	return nil
+}
+
+func (u *UniService) CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error {
+	if groupName == "" {
+		return fmt.Errorf("group name cannot be empty")
+	}
+	if departmentID <= 0 {
+		return fmt.Errorf("invalid department ID")
+	}
+	if facultyID <= 0 {
+		return fmt.Errorf("invalid faculty ID")
+	}
+	if universityID <= 0 {
+		return fmt.Errorf("invalid university ID")
+	}
+
+	err := u.uniRepo.CreateNewGroup(ctx, groupName, departmentID, facultyID, universityID)
+	if err != nil {
+		return fmt.Errorf("failed to create group: %w", err)
+	}
+
+	return nil
+}

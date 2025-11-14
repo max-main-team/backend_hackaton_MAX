@@ -115,3 +115,31 @@ func (u *uniRepository) CreateSemestersForUniversity(ctx context.Context, uniID 
 	}
 	return nil
 }
+
+func (u *uniRepository) CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error {
+	query := `
+		INSERT INTO universities.university_departments (name, faculty_id, university_id)
+		VALUES ($1, $2, $3)
+	`
+
+	_, err := u.pool.Exec(ctx, query, departmentName, facultyID, universityID)
+	if err != nil {
+		return fmt.Errorf("failed to create department: %w", err)
+	}
+
+	return nil
+}
+
+func (u *uniRepository) CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error {
+	query := `
+		INSERT INTO universities.course_groups (name, university_department_id, faculty_id, university_id)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	_, err := u.pool.Exec(ctx, query, groupName, departmentID, facultyID, universityID)
+	if err != nil {
+		return fmt.Errorf("failed to create group: %w", err)
+	}
+
+	return nil
+}

@@ -4,6 +4,35 @@ definitions:
     properties:
       message: {}
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateDepartmentRequest:
+    properties:
+      department_name:
+        type: string
+      faculty_id:
+        type: integer
+      university_id:
+        type: integer
+    required:
+    - department_name
+    - faculty_id
+    - university_id
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest:
+    properties:
+      department_id:
+        type: integer
+      faculty_id:
+        type: integer
+      group_name:
+        type: string
+      university_id:
+        type: integer
+    required:
+    - department_id
+    - faculty_id
+    - group_name
+    - university_id
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateNewFacultyRequest:
     properties:
       faculty_name:
@@ -212,6 +241,49 @@ info:
   title: Hackaton API
   version: "1.0"
 paths:
+  /admin/department:
+    post:
+      consumes:
+      - application/json
+      description: Create a new department for a specific faculty and university.
+        Admin role required.
+      parameters:
+      - description: Department data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: department created successfully'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: Forbidden - user is not admin
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Create new department
+      tags:
+      - admin
   /admin/faculties:
     post:
       consumes:
@@ -255,6 +327,49 @@ paths:
       summary: Create new faculty
       tags:
       - faculties
+  /admin/groups:
+    post:
+      consumes:
+      - application/json
+      description: Create a new group for a specific department, faculty and university.
+        Admin role required.
+      parameters:
+      - description: Group data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: group created successfully'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: Forbidden - user is not admin
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Create new group
+      tags:
+      - admin
   /admin/personalities/access:
     delete:
       consumes:

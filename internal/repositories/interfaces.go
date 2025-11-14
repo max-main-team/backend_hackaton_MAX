@@ -28,6 +28,10 @@ type UniRepository interface {
 	CreateSemestersForUniversity(ctx context.Context, uniID int64, periods []models.SemesterPeriod) error
 
 	GetUniInfoByUserID(ctx context.Context, id int64) (*models.UniversitiesData, error)
+
+	CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error
+
+	CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error
 }
 
 type PersonalitiesRepository interface {

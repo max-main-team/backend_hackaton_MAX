@@ -6,3 +6,9 @@ dist/
 tmp/
 node_modules/
 .env
+*.go.go
+app
+*.exe
+*.dll
+*.so
+*.dylib

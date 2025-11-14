@@ -34,6 +34,12 @@ type PersonalitiesRepository interface {
 	RequestUniversityAccess(ctx context.Context, uniAccess personalities.UniversityAccess) error
 	GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error)
 	AddNewUser(ctx context.Context, request personalities2.AcceptAccessRequest) error
+	GetAllUniversitiesForPerson(ctx context.Context, userID int64) ([]models.UniversitiesData, error)
+	GetAllFacultiesForUniversity(ctx context.Context, universityID int64) ([]models.Faculties, error)
+	GetAllDepartmentsForFaculty(ctx context.Context, facultyID int64) ([]models.Departments, error)
+	GetAllGroupsForDepartment(ctx context.Context, departmentID int64) ([]models.Groups, error)
+	GetAllStudentsForGroup(ctx context.Context, groupID int64) ([]models.User, error)
+	GetAllTeachersForUniversity(ctx context.Context, universityID int64) ([]models.User, error)
 }
 
 type FaculRepository interface {

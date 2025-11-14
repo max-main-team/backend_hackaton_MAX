@@ -102,11 +102,19 @@ func NewRouter(logger embedlog.Logger,
 	// get info about all universities
 	uni.GET("/", uniHandler.GetAllUniversities)
 
-	// persons
+	// personalities Admin
 	persons := admin.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)
 	persons.GET("/access", personsHandler.GetRequests)
 	persons.POST("/access/accept", personsHandler.AcceptAccess)
+
+	// personalities
+	protected.GET("/personalities/universities", personsHandler.GetAllUniversitiesForPerson)
+	protected.GET("/personalities/faculty", personsHandler.GetAllFacultiesForUniversity)
+	protected.GET("/personalities/departments", personsHandler.GetAllDepartmentsForFaculty)
+	protected.GET("/personalities/groups", personsHandler.GetAllGroupsForDepartment)
+	protected.GET("/personalities/student", personsHandler.GetAllStudentForGtoup)
+	protected.GET("/personalities/teachers", personsHandler.GetAllTeachersForUniversity)
 
 	// subjects
 	subjects := protected.Group("/subjects")

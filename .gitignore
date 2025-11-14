@@ -1,2 +1,7 @@
 .idea
 .vscode
+app
+*.exe
+*.dll
+*.so
+*.dylib

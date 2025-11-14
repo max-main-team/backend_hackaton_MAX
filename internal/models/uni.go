@@ -9,6 +9,7 @@ type UniversitiesData struct {
 	ShortName   string
 	SiteUrl     *string
 	Description *string
+	PhotoUrl    *string
 }
 type SemesterPeriod struct {
 	StartDate time.Time

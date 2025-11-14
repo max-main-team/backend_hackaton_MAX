@@ -7,6 +7,7 @@ type UniInfoResponse struct {
 	ShortName   string `json:"uni_short_name" example:"ITMO"`
 	SiteUrl     string `json:"site_url" example:"https://itmo.ru"`
 	Description string `json:"description" example:"One of the leading Russian universities in the field of information technology, optical design, and engineering."`
+	PhotoUrl    string `json:"photo_url" example:"https://itmo.ru/images/itmo.jpg"`
 }
 
 type SemesterPeriod struct {

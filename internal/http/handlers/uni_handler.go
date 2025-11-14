@@ -26,6 +26,17 @@ func NewUniHandler(uniService *services.UniService, userService *services.UserSe
 	}
 }
 
+// GetUniInfo godoc
+// @Summary      Get university information for current user
+// @Description  Get detailed information about the university associated with the authenticated user
+// @Tags         universities
+// @Accept       json
+// @Produce      json
+// @Success      200   {object}  dto.UniInfoResponse  "University information"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized - user not authenticated"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error - failed to get university info"
+// @Router       /universities/info [get]
+// @Security     BearerAuth
 func (u *UniHandler) GetUniInfo(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
@@ -46,10 +57,13 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.UniInfoResponse{
-		ID:        uniInfo.ID,
-		Name:      uniInfo.Name,
-		ShortName: uniInfo.ShortName,
-		City:      uniInfo.City,
+		ID:          uniInfo.ID,
+		Name:        uniInfo.Name,
+		ShortName:   uniInfo.ShortName,
+		City:        uniInfo.City,
+		SiteUrl:     *uniInfo.SiteUrl,
+		Description: *uniInfo.Description,
+		PhotoUrl:    *uniInfo.PhotoUrl,
 	})
 }
 
@@ -75,6 +89,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 			ShortName:   uni.ShortName,
 			SiteUrl:     NewString(uni.SiteUrl),
 			Description: NewString(uni.Description),
+			PhotoUrl:    NewString(uni.PhotoUrl),
 		})
 	}
 

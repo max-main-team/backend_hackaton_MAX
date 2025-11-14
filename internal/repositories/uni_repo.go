@@ -116,15 +116,39 @@ func (u *uniRepository) CreateSemestersForUniversity(ctx context.Context, uniID 
 	return nil
 }
 
-func (u *uniRepository) CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error {
-	query := `
-		INSERT INTO universities.university_departments (name, faculty_id, university_id)
-		VALUES ($1, $2, $3)
-	`
+func (u *uniRepository) CreateNewDepartment(ctx context.Context, departmentName, departmentCode, aliasName string, facultyID, universityID int64) error {
+	tx, err := u.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil {
+			_ = rollbackErr
+		}
+	}()
 
-	_, err := u.pool.Exec(ctx, query, departmentName, facultyID, universityID)
+	insertDepartmentQuery := `
+		INSERT INTO universities.departments (name, code)
+		VALUES ($1, $2)
+		RETURNING id
+	`
+	var departmentID int64
+	err = tx.QueryRow(ctx, insertDepartmentQuery, departmentName, departmentCode).Scan(&departmentID)
 	if err != nil {
 		return fmt.Errorf("failed to create department: %w", err)
+	}
+
+	insertLinkQuery := `
+		INSERT INTO universities.university_departments (university_id, faculty_id, department_id, alias_name)
+		VALUES ($1, $2, $3, $4)
+	`
+	_, err = tx.Exec(ctx, insertLinkQuery, universityID, facultyID, departmentID, aliasName)
+	if err != nil {
+		return fmt.Errorf("failed to create university department link: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

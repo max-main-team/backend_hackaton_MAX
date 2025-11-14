@@ -9,6 +9,8 @@ type DepartmentInfoResponse struct {
 
 type CreateDepartmentRequest struct {
 	DepartmentName string `json:"department_name" validate:"required"`
+	DepartmentCode string `json:"department_code"`
+	AliasName      string `json:"alias_name"`
 	FacultyID      int64  `json:"faculty_id" validate:"required"`
 	UniversityID   int64  `json:"university_id" validate:"required"`
 }

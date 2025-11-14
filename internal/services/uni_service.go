@@ -82,7 +82,7 @@ func ValidateSemesters(periods []models.SemesterPeriod) error {
 	return nil
 }
 
-func (u *UniService) CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error {
+func (u *UniService) CreateNewDepartment(ctx context.Context, departmentName, departmentCode, aliasName string, facultyID, universityID int64) error {
 	if departmentName == "" {
 		return fmt.Errorf("department name cannot be empty")
 	}
@@ -93,7 +93,7 @@ func (u *UniService) CreateNewDepartment(ctx context.Context, departmentName str
 		return fmt.Errorf("invalid university ID")
 	}
 
-	err := u.uniRepo.CreateNewDepartment(ctx, departmentName, facultyID, universityID)
+	err := u.uniRepo.CreateNewDepartment(ctx, departmentName, departmentCode, aliasName, facultyID, universityID)
 	if err != nil {
 		return fmt.Errorf("failed to create department: %w", err)
 	}

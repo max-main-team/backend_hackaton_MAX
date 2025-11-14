@@ -29,7 +29,7 @@ type UniRepository interface {
 
 	GetUniInfoByUserID(ctx context.Context, id int64) (*models.UniversitiesData, error)
 
-	CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error
+	CreateNewDepartment(ctx context.Context, departmentName, departmentCode, aliasName string, facultyID, universityID int64) error
 
 	CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error
 

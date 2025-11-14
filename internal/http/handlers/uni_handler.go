@@ -192,11 +192,11 @@ func ConvertDtoModel(dto []dto.SemesterPeriod) ([]models.SemesterPeriod, error) 
 
 // CreateNewDepartment godoc
 // @Summary      Create new department
-// @Description  Create a new department for a specific faculty and university. Admin role required.
+// @Description  Create a new department and link it to a specific faculty and university. Creates entry in universities.departments and universities.university_departments. Admin role required.
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param        request  body   dto.CreateDepartmentRequest  true  "Department data"
+// @Param        request  body   dto.CreateDepartmentRequest  true  "Department data (department_name required, department_code and alias_name optional)"
 // @Success      200   {object}  map[string]string  "status: department created successfully"
 // @Failure      400   {object}  echo.HTTPError  "Invalid request body or missing required fields"
 // @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
@@ -245,7 +245,7 @@ func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "department name is required")
 	}
 
-	err = u.uniService.CreateNewDepartment(context.TODO(), req.DepartmentName, req.FacultyID, req.UniversityID)
+	err = u.uniService.CreateNewDepartment(context.TODO(), req.DepartmentName, req.DepartmentCode, req.AliasName, req.FacultyID, req.UniversityID)
 	if err != nil {
 		log.Errorf("[CreateNewDepartment] failed to create new department: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new department")

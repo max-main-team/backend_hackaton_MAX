@@ -317,3 +317,138 @@ func (u *UniHandler) CreateNewGroup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "group created successfully"})
 }
+
+// GetAllEvents godoc
+// @Summary      Get all events for user's university
+// @Description  Get all events for the university associated with the authenticated user
+// @Tags         universities
+// @Accept       json
+// @Produce      json
+// @Success      200   {array}   dto.EventResponse  "List of events"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized - user not authenticated"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /universities/events [get]
+// @Security     BearerAuth
+func (u *UniHandler) GetAllEvents(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[GetAllEvents] GetAllEvents called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[GetAllEvents] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[GetAllEvents] failed to get university info. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get university info")
+	}
+
+	events, err := u.uniService.GetAllEventsByUniversityID(context.TODO(), int64(uniInfo.ID))
+	if err != nil {
+		log.Errorf("[GetAllEvents] failed to get events. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get events")
+	}
+
+	var response []dto.EventResponse
+	for _, event := range events {
+		response = append(response, dto.EventResponse{
+			ID:           event.ID,
+			UniversityID: event.UniversityID,
+			Title:        event.Title,
+			Description:  event.Description,
+			PhotoUrl:     event.PhotoUrl,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+// CreateNewEvent godoc
+// @Summary      Create new event
+// @Description  Create a new event for the university. Admin role required.
+// @Tags         universities
+// @Accept       json
+// @Produce      json
+// @Param        request  body   dto.CreateEventRequest  true  "Event data"
+// @Success      200   {object}  map[string]string  "status: event created successfully"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body or missing required fields"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      403   {object}  echo.HTTPError  "Forbidden - user is not admin"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /universities/events [post]
+// @Security     BearerAuth
+func (u *UniHandler) CreateNewEvent(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[CreateNewEvent] CreateNewEvent called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[CreateNewEvent] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[CreateNewEvent] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+	}
+
+	isAdmin := false
+	for _, role := range roles.Roles {
+		if role == "admin" {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		log.Errorf("[CreateNewEvent] permission denied for user id %d", currentUser.ID)
+		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
+	}
+
+	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[CreateNewEvent] failed to get university info. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get university info")
+	}
+
+	var req dto.CreateEventRequest
+
+	if err := c.Bind(&req); err != nil {
+		log.Errorf("[CreateNewEvent] failed to decode request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request format")
+	}
+
+	if req.Title == "" {
+		log.Errorf("[CreateNewEvent] title is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "title is required")
+	}
+
+	if req.Description == "" {
+		log.Errorf("[CreateNewEvent] description is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "description is required")
+	}
+
+	if req.PhotoUrl == "" {
+		log.Errorf("[CreateNewEvent] photo_url is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "photo_url is required")
+	}
+
+	event := models.Event{
+		UniversityID: int64(uniInfo.ID),
+		Title:        req.Title,
+		Description:  req.Description,
+		PhotoUrl:     req.PhotoUrl,
+	}
+
+	err = u.uniService.CreateNewEvent(context.TODO(), event)
+	if err != nil {
+		log.Errorf("[CreateNewEvent] failed to create event: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create event")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"status": "event created successfully"})
+}

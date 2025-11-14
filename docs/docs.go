@@ -919,6 +919,113 @@ const docTemplate = `{
                 }
             }
         },
+        "/universities/events": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all events for the university associated with the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Get all events for user's university",
+                "responses": {
+                    "200": {
+                        "description": "List of events",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.EventResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - user not authenticated",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new event for the university. Admin role required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Create new event",
+                "parameters": [
+                    {
+                        "description": "Event data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: event created successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or missing required fields",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/universities/info": {
             "get": {
                 "security": [
@@ -1052,6 +1159,25 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateEventRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "photo_url",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest": {
             "type": "object",
             "required": [
@@ -1129,6 +1255,26 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 123456789
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.EventResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "university_id": {
+                    "type": "integer"
                 }
             }
         },

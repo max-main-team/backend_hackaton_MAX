@@ -122,3 +122,38 @@ func (u *UniService) CreateNewGroup(ctx context.Context, groupName string, depar
 
 	return nil
 }
+
+func (u *UniService) CreateNewEvent(ctx context.Context, event models.Event) error {
+	if event.Title == "" {
+		return fmt.Errorf("event title cannot be empty")
+	}
+	if event.Description == "" {
+		return fmt.Errorf("event description cannot be empty")
+	}
+	if event.PhotoUrl == "" {
+		return fmt.Errorf("event photo URL cannot be empty")
+	}
+	if event.UniversityID <= 0 {
+		return fmt.Errorf("invalid university ID")
+	}
+
+	err := u.uniRepo.CreateNewEvent(ctx, event)
+	if err != nil {
+		return fmt.Errorf("failed to create event: %w", err)
+	}
+
+	return nil
+}
+
+func (u *UniService) GetAllEventsByUniversityID(ctx context.Context, universityID int64) ([]models.Event, error) {
+	if universityID <= 0 {
+		return nil, fmt.Errorf("invalid university ID")
+	}
+
+	events, err := u.uniRepo.GetAllEventsByUniversityID(ctx, universityID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get events: %w", err)
+	}
+
+	return events, nil
+}

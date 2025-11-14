@@ -143,3 +143,49 @@ func (u *uniRepository) CreateNewGroup(ctx context.Context, groupName string, de
 
 	return nil
 }
+
+func (u *uniRepository) CreateNewEvent(ctx context.Context, event models.Event) error {
+	query := `
+		INSERT INTO universities.events (university_id, title, description, photo_url)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	_, err := u.pool.Exec(ctx, query, event.UniversityID, event.Title, event.Description, event.PhotoUrl)
+	if err != nil {
+		return fmt.Errorf("failed to create event: %w", err)
+	}
+
+	return nil
+}
+
+func (u *uniRepository) GetAllEventsByUniversityID(ctx context.Context, universityID int64) ([]models.Event, error) {
+	var events []models.Event
+
+	query := `
+		SELECT id, university_id, title, description, photo_url
+		FROM universities.events
+		WHERE university_id = $1
+		ORDER BY id DESC
+	`
+
+	rows, err := u.pool.Query(ctx, query, universityID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get events: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event models.Event
+		err := rows.Scan(&event.ID, &event.UniversityID, &event.Title, &event.Description, &event.PhotoUrl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan event row: %w", err)
+		}
+		events = append(events, event)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return events, nil
+}

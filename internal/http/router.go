@@ -130,5 +130,10 @@ func NewRouter(logger embedlog.Logger,
 	// groups
 	groups := admin.Group("/groups")
 	groups.POST("", uniHandler.CreateNewGroup)
+
+	// events
+	events := uni.Group("/events")
+	events.POST("", uniHandler.CreateNewEvent)
+	events.GET("", uniHandler.GetAllEvents)
 	return e
 }

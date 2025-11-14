@@ -32,6 +32,10 @@ type UniRepository interface {
 	CreateNewDepartment(ctx context.Context, departmentName string, facultyID, universityID int64) error
 
 	CreateNewGroup(ctx context.Context, groupName string, departmentID, facultyID, universityID int64) error
+
+	CreateNewEvent(ctx context.Context, event models.Event) error
+
+	GetAllEventsByUniversityID(ctx context.Context, universityID int64) ([]models.Event, error)
 }
 
 type PersonalitiesRepository interface {

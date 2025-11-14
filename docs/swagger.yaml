@@ -17,6 +17,19 @@ definitions:
     - faculty_id
     - university_id
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateEventRequest:
+    properties:
+      description:
+        type: string
+      photo_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - photo_url
+    - title
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateGroupRequest:
     properties:
       department_id:
@@ -72,6 +85,19 @@ definitions:
     - department_name
     - faculty_name
     - id
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.EventResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      photo_url:
+        type: string
+      title:
+        type: string
+      university_id:
+        type: integer
     type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse:
     properties:
@@ -844,6 +870,75 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all universities
+      tags:
+      - universities
+  /universities/events:
+    get:
+      consumes:
+      - application/json
+      description: Get all events for the university associated with the authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of events
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.EventResponse'
+            type: array
+        "401":
+          description: Unauthorized - user not authenticated
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get all events for user's university
+      tags:
+      - universities
+    post:
+      consumes:
+      - application/json
+      description: Create a new event for the university. Admin role required.
+      parameters:
+      - description: Event data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: event created successfully'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: Forbidden - user is not admin
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Create new event
       tags:
       - universities
   /universities/info:

@@ -117,7 +117,7 @@ func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
 	}
 
-	requestID := c.Param("request_id")
+	requestID := c.QueryParam("request_id")
 	if requestID == "" {
 		log.Errorf("[RejectRequestAccess] invalid request_id")
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request_id")

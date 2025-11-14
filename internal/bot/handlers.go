@@ -34,7 +34,7 @@ func (b *Bot) handleMessage(ctx context.Context, messageUpdate *schemes.MessageC
 	)
 
 	if b.isCommand(message.Body.Text) {
-		b.handleCommand(ctx, message)
+		b.handleCommand(ctx, messageUpdate)
 	}
 }
 
@@ -42,15 +42,15 @@ func (b *Bot) isCommand(text string) bool {
 	return strings.HasPrefix(text, "/")
 }
 
-func (b *Bot) handleCommand(ctx context.Context, message schemes.Message) {
-	text := message.Body.Text
+func (b *Bot) handleCommand(ctx context.Context, messageUpdate *schemes.MessageCreatedUpdate) {
+	text := messageUpdate.Message.Body.Text
 	command := strings.TrimPrefix(text, "/")
 	command = strings.Split(command, " ")[0]
 	command = strings.ToLower(command)
 
 	switch command {
 	case "start":
-		b.handleStartCommand(ctx, message)
+		b.handleStartCommand(ctx, messageUpdate)
 	default:
 		b.logger.Print(ctx, "Unknown command", "command", command)
 	}

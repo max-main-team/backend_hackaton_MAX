@@ -7,8 +7,9 @@ import (
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
 )
 
-func (b *Bot) handleStartCommand(ctx context.Context, message schemes.Message) {
-	chatID := message.Recipient.ChatId
+func (b *Bot) handleStartCommand(ctx context.Context, messageUpdate *schemes.MessageCreatedUpdate) {
+	chatID := messageUpdate.GetChatID()
+	userName := messageUpdate.Message.Sender.Name
 
 	msg := maxbot.NewMessage().
 		SetBot(b.token).
@@ -20,5 +21,5 @@ func (b *Bot) handleStartCommand(ctx context.Context, message schemes.Message) {
 		return
 	}
 
-	b.logger.Print(ctx, "Sent greeting message", "to", message.Sender.Name)
+	b.logger.Print(ctx, "Sent greeting message", "to", userName)
 }

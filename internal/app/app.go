@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	cfg "github.com/max-main-team/backend_hackaton_MAX/cfg"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/bot"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/http/handlers"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/repositories"
@@ -25,6 +26,7 @@ type App struct {
 	cfg     cfg.Config
 	db      *pgxpool.Pool
 	echo    *echo.Echo
+	bot     *bot.Bot
 
 	jwtService       *auth.JWTService
 	userHandler      *handlers.UserHandler
@@ -94,8 +96,32 @@ func (a *App) initDependencies() {
 	if a.jwtService == nil {
 		panic("jwt service is nil")
 	}
+
+	// init bot
+	if botToken, ok := a.cfg.APIKeys[api_key_bot]; ok && botToken != "" {
+		maxBot, err := bot.New(botToken, a.sl)
+		if err != nil {
+			a.sl.Errorf("Failed to create bot: %v", err)
+		} else {
+			a.bot = maxBot
+			a.sl.Print(context.Background(), "Bot initialized successfully")
+		}
+	} else {
+		a.sl.Print(context.Background(), "Bot token not found in config, bot will not be started")
+	}
 }
 func (a *App) Run(ctx context.Context) error {
+	// Запускаем бота в отдельной горутине, если он инициализирован
+	if a.bot != nil {
+		go func() {
+			a.sl.Print(ctx, "Starting bot goroutine...")
+			if err := a.bot.Start(ctx); err != nil {
+				a.sl.Errorf("Bot stopped with error: %v", err)
+			}
+		}()
+		a.sl.Print(ctx, "Bot started successfully")
+	}
+
 	addr := fmt.Sprintf("%s:%d", a.cfg.Server.Host, a.cfg.Server.Port)
 	a.sl.Print(ctx, "starting server", "addr", addr)
 	return a.echo.Start(addr)

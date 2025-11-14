@@ -3,6 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+RUN rm -f internal/http/handlers/*.go.go
 
 RUN go build -o app ./cmd/uni_bot
 

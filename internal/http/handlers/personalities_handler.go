@@ -83,6 +83,61 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 	return c.JSON(http.StatusOK, "ok")
 }
 
+// RejectRequestAccess godoc
+// @Summary reject access request
+// @Description decline access request for user
+// @Tags personalities
+// @Accept json
+// @Produce json
+// @Param request_id query int true "request_id"
+// @Success      200   {object}  string  "ok"
+// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
+// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Router       /admin/personalities/access [delete]
+func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[RejectRequestAccess] RejectRequestAccess called")
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[RejectRequestAccess] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	if err != nil {
+		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
+	}
+	hasAdmin := slices.ContainsFunc(roles.Roles, func(s string) bool {
+		return s == "admin"
+	})
+	if !hasAdmin {
+		log.Errorf("[RequestAccess] GetUserRolesByID role admin not found")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not admin")
+	}
+
+	requestID := c.Param("request_id")
+	if requestID == "" {
+		log.Errorf("[RejectRequestAccess] invalid request_id")
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request_id")
+	}
+
+	requestIDInt, err := strconv.ParseInt(requestID, 10, 64)
+	if err != nil {
+		log.Errorf("[RejectRequestAccess] failed to parse request_id: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request_id")
+	}
+
+	err := h.personServ.RejectRequest(context.TODO(), requestIDInt)
+	if err != nil {
+		log.Errorf("[RejectRequestAccess] failed to reject request: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to reject request")
+	}
+
+	return c.JSON(http.StatusOK, "ok")
+}
+
 // GetRequests godoc
 // @Summary      get all requests access for administration of university
 // @Description  Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).

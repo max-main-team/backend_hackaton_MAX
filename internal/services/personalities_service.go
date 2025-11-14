@@ -55,6 +55,7 @@ func (s *PersonalitiesService) GetAccessRequest(ctx context.Context, userID, lim
 	}
 
 	response.Data = []struct {
+		RequestID int64                   `json:"request_id"`
 		UserID    int64                   `json:"user_id"`
 		UserType  personalities2.RoleType `json:"role"`
 		FirstName string                  `json:"first_name"`
@@ -71,6 +72,11 @@ func (s *PersonalitiesService) AcceptAccess(ctx context.Context, request persona
 		return err
 	}
 	return nil
+}
+
+func (s *PersonalitiesService) RejectRequest(ctx context.Context, requestID int64) error {
+	err := s.PersonsRepo.DeleteRequest(ctx, requestID)
+	return err
 }
 
 func (s *PersonalitiesService) GetAllUniversitiesForPerson(ctx context.Context, userID int64) ([]models.UniversitiesData, error) {

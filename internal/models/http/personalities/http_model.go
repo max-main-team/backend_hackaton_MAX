@@ -9,6 +9,7 @@ type RequestAccessToUniversity struct {
 
 type AccessRequestResponse struct {
 	Data []struct {
+		RequestID int64                  `json:"request_id"`
 		UserID    int64                  `json:"user_id"`
 		UserType  personalities.RoleType `json:"role"`
 		FirstName string                 `json:"first_name"`

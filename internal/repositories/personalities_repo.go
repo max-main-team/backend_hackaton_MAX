@@ -57,9 +57,32 @@ func (r *PersonalitiesRepo) RequestUniversityAccess(ctx context.Context, uniAcce
 	return nil
 }
 
+func (r *PersonalitiesRepo) DeleteRequest(ctx context.Context, requestID int64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback(ctx)
+		} else if err != nil {
+			_ = tx.Rollback(ctx)
+		}
+		err = tx.Commit(ctx)
+	}()
+
+	_, err = tx.Exec(ctx, "DELETE FROM users.persons_adds WHERE id = $1", requestID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit, offset int64) (personalities.AccessRequests, error) {
 	const qGetAccessByUser = `
 		SELECT
+		    u.id,
 			u.from_max_user_id as user_id,
 			u.role_type as role,
 			mu.first_name as first_name,
@@ -81,23 +104,24 @@ func (r *PersonalitiesRepo) GetAccessRequest(ctx context.Context, userID, limit,
 
 	var result personalities.AccessRequests
 	for rows.Next() {
-		var userID int64
+		var userID, requestID int64
 		var roleType personalities.RoleType
 		var (
 			firstName string
 			lastName,
 			username *string
 		)
-		if err := rows.Scan(&userID, &roleType, &firstName, &lastName, &username); err != nil {
+		if err := rows.Scan(&requestID, &userID, &roleType, &firstName, &lastName, &username); err != nil {
 			return personalities.AccessRequests{}, err
 		}
 		result.Requests = append(result.Requests, struct {
+			RequestID int64
 			UserID    int64
 			UserType  personalities.RoleType
 			FirstName string
 			LastName  *string
 			Username  *string
-		}{userID, roleType, firstName, lastName, username})
+		}{requestID, userID, roleType, firstName, lastName, username})
 	}
 
 	return result, nil

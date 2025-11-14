@@ -155,6 +155,8 @@ definitions:
               type: string
             last_name:
               type: string
+            request_id:
+              type: integer
             role:
               $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType'
             user_id:
@@ -254,6 +256,38 @@ paths:
       tags:
       - faculties
   /admin/personalities/access:
+    delete:
+      consumes:
+      - application/json
+      description: decline access request for user
+      parameters:
+      - description: request_id
+        in: query
+        name: request_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: reject access request
+      tags:
+      - personalities
     get:
       consumes:
       - application/json

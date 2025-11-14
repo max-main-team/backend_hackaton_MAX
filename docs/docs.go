@@ -188,6 +188,54 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "decline access request for user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "personalities"
+                ],
+                "summary": "reject access request",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "request_id",
+                        "name": "request_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
             }
         },
         "/admin/personalities/access/accept": {
@@ -991,6 +1039,9 @@ const docTemplate = `{
                             },
                             "last_name": {
                                 "type": "string"
+                            },
+                            "request_id": {
+                                "type": "integer"
                             },
                             "role": {
                                 "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_repository_personalities.RoleType"

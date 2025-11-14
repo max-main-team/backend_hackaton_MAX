@@ -106,6 +106,7 @@ func NewRouter(logger embedlog.Logger,
 	persons := admin.Group("/personalities")
 	persons.POST("/access", personsHandler.RequestAccess)
 	persons.GET("/access", personsHandler.GetRequests)
+	persons.DELETE("/access", personsHandler.RejectRequestAccess)
 	persons.POST("/access/accept", personsHandler.AcceptAccess)
 
 	// personalities

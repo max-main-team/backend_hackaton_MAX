@@ -44,6 +44,11 @@ func (s *PersonalitiesService) GetAccessRequest(ctx context.Context, userID, lim
 	if int64(len(accesses.Requests)) > limit {
 		response.HasMore = true
 	}
+
+	if int64(len(accesses.Requests)) < limit {
+		limit = int64(len(accesses.Requests))
+	}
+
 	if len(accesses.Requests) == 0 {
 		return &response, nil
 	}

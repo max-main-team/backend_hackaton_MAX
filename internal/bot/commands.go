@@ -34,3 +34,32 @@ func (b *Bot) handleStartCommand(ctx context.Context, messageUpdate *schemes.Mes
 		"response", resp,
 	)
 }
+
+func (b *Bot) sendWelcomeMessage(ctx context.Context, chatID int64, userName string) {
+	welcomeText := `Привет! 👋
+
+Я бот университетской системы МАКС.
+
+Доступные команды:
+/start - Показать это сообщение`
+
+	b.logger.Print(ctx, "Sending welcome message",
+		"chat_id", chatID,
+		"to", userName,
+	)
+
+	msg := maxbot.NewMessage().
+		SetChat(chatID).
+		SetText(welcomeText)
+
+	resp, err := b.api.Messages.Send(ctx, msg)
+	if err != nil {
+		b.logger.Errorf("Failed to send welcome message: %v (chat_id=%d)", err, chatID)
+		return
+	}
+
+	b.logger.Print(ctx, "Welcome message sent successfully",
+		"to", userName,
+		"response", resp,
+	)
+}

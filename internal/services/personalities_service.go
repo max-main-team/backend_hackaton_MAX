@@ -44,6 +44,10 @@ func (s *PersonalitiesService) GetAccessRequest(ctx context.Context, userID, lim
 	if int64(len(accesses.Requests)) > limit {
 		response.HasMore = true
 	}
+	if len(accesses.Requests) == 0 {
+		return &response, nil
+	}
+
 	response.Data = []struct {
 		UserID   int64                   `json:"user_id"`
 		UserType personalities2.RoleType `json:"role"`

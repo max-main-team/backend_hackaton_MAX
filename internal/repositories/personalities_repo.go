@@ -150,14 +150,14 @@ func (r *PersonalitiesRepo) AddNewUser(ctx context.Context, request personalitie
 			                            max_user_id,
 			                            university_department_id,
 			                            course_group_id
-			) VALUES (%d, %d, %d)
+			) VALUES (%d, %d, %d) ON CONFLICT DO NOTHING;
 		`, request.UserID, request.UniversityDepartmentID, request.CourseGroupID)
 	case personalities.Teacher:
 		qInsertUser = fmt.Sprintf(`
 			INSERT INTO personalities.teachers (
 			                            max_user_id,
 			                            university_id
-			) VALUES (%d, %d)
+			) VALUES (%d, %d) ON CONFLICT DO NOTHING;
 	`, request.UserID, request.UniversityID)
 	case personalities.Admin:
 		qInsertUser = fmt.Sprintf(`
@@ -165,7 +165,7 @@ func (r *PersonalitiesRepo) AddNewUser(ctx context.Context, request personalitie
 		                                   max_user_id,
 		                                   university_id,
 		                                	faculty_id
-		) VALUES (%d, %d, %d)
+		) VALUES (%d, %d, %d) ON CONFLICT DO NOTHING;
 `, request.UserID, request.UniversityID, request.FacultyID)
 	}
 

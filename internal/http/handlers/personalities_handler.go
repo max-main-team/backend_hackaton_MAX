@@ -129,7 +129,7 @@ func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request_id")
 	}
 
-	err := h.personServ.RejectRequest(context.TODO(), requestIDInt)
+	err = h.personServ.RejectRequest(context.TODO(), requestIDInt)
 	if err != nil {
 		log.Errorf("[RejectRequestAccess] failed to reject request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to reject request")

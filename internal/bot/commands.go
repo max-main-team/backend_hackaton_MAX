@@ -18,7 +18,7 @@ func (b *Bot) handleStartCommand(ctx context.Context, messageUpdate *schemes.Mes
 		"to", userName,
 	)
 
-	// Отправляем сообщение в чат (как в примере)
+	
 	msg := maxbot.NewMessage().
 		SetChat(chatID).
 		SetText("Привет")

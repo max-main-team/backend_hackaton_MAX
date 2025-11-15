@@ -16,13 +16,11 @@ func (b *Bot) handleUpdate(ctx context.Context, update schemes.UpdateInterface) 
 		"chat_id", update.GetChatID(),
 	)
 
-	// Обрабатываем событие первого запуска бота
 	if botStartedUpdate, ok := update.(*schemes.BotStartedUpdate); ok {
 		b.handleBotStarted(ctx, botStartedUpdate)
 		return
 	}
 
-	// Обрабатываем обычные сообщения
 	if messageUpdate, ok := update.(*schemes.MessageCreatedUpdate); ok {
 		b.handleMessage(ctx, messageUpdate)
 		return
@@ -40,7 +38,6 @@ func (b *Bot) handleBotStarted(ctx context.Context, botStartedUpdate *schemes.Bo
 		"user_name", userName,
 	)
 
-	// Отправляем приветственное сообщение при первом запуске
 	b.sendWelcomeMessage(ctx, chatID, userName)
 }
 

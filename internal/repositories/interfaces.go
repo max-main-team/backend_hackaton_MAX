@@ -7,6 +7,7 @@ import (
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	personalities2 "github.com/max-main-team/backend_hackaton_MAX/internal/models/http/personalities"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/personalities"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/schedules"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/repository/subjects"
 )
 
@@ -66,4 +67,10 @@ type SubjectsRepository interface {
 	Create(ctx context.Context, name string, uniID int64) error
 	Get(ctx context.Context, uniID, limit, offset int64) (*subjects.Subjects, error)
 	Delete(ctx context.Context, id int64) error
+}
+
+type SchedulesRepository interface {
+	CreateClass(ctx context.Context, class schedules.Class) (int64, error)
+	DeleteClass(ctx context.Context, classID int64) error
+	GetClassesByUniversity(ctx context.Context, universityID int64) ([]schedules.Class, error)
 }

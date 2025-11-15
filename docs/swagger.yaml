@@ -727,67 +727,6 @@ paths:
       summary: Accept Request for adding in University
       tags:
       - personalities
-  /admin/schedules/classes:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Class info
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateClassRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: class_id
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: create class (pair) slot
-      tags:
-      - schedules
-  /admin/schedules/classes/{class_id}:
-    delete:
-      parameters:
-      - description: Class ID
-        in: path
-        name: class_id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: ok
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: delete class
-      tags:
-      - schedules
   /auth/checkToken:
     get:
       consumes:
@@ -1118,6 +1057,66 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: get classes for university
+      tags:
+      - schedules
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Class info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateClassRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: class_id
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: create class (pair) slot
+      tags:
+      - schedules
+  /schedules/classes/{class_id}:
+    delete:
+      parameters:
+      - description: Class ID
+        in: path
+        name: class_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: delete class
       tags:
       - schedules
   /subjects:

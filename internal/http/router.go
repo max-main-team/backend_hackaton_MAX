@@ -21,7 +21,8 @@ func NewRouter(logger embedlog.Logger,
 	uniHandler *handlers.UniHandler,
 	personsHandler *handlers.PersonalitiesHandler,
 	facultiesHandler *handlers.FaculHandler,
-	subjectsHandler *handlers.SubjectHandler) *echo.Echo {
+	subjectsHandler *handlers.SubjectHandler,
+	schedulesHandler *handlers.SchedulesHandler) *echo.Echo {
 	e := echo.New()
 
 	// Настройка таймаутов HTTP сервера
@@ -162,5 +163,11 @@ func NewRouter(logger embedlog.Logger,
 	events := uni.Group("/events")
 	events.POST("", uniHandler.CreateNewEvent)
 	events.GET("", uniHandler.GetAllEvents)
+
+	// schedules
+	schedules := protected.Group("/schedules")
+	schedules.DELETE("/classes/{class_id}", schedulesHandler.DeleteClass)
+	schedules.GET("/classes", schedulesHandler.GetClassesByUniversity)
+	schedules.POST("/classes", schedulesHandler.CreateClass)
 	return e
 }

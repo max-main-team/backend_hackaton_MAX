@@ -35,6 +35,7 @@ type App struct {
 	personsHandler   *handlers.PersonalitiesHandler
 	facultiesHandler *handlers.FaculHandler
 	subjectsHandler  *handlers.SubjectHandler
+	schedulesHandler *handlers.SchedulesHandler
 }
 
 func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool) *App {
@@ -52,7 +53,8 @@ func New(appName string, slogger embedlog.Logger, c cfg.Config, db *pgxpool.Pool
 		a.uniHandler,
 		a.personsHandler,
 		a.facultiesHandler,
-		a.subjectsHandler)
+		a.subjectsHandler,
+		a.schedulesHandler)
 	return a
 }
 
@@ -69,6 +71,7 @@ func (a *App) initDependencies() {
 	personsRepo := repositories.NewPersonalitiesRepo(a.db)
 	faculRepo := repositories.NewFaculRepository(a.db)
 	subjectsRepo := repositories.NewSubjectRepo(a.db)
+	schedsRepo := repositories.NewScheduleRepo(a.db)
 
 	// init services
 	userService := services.NewUserService(userRepo)
@@ -77,6 +80,7 @@ func (a *App) initDependencies() {
 	faculService := services.NewFaculService(faculRepo)
 	personService := services.NewPersonalitiesService(personsRepo)
 	subjectsService := services.NewSubjectService(subjectsRepo)
+	schedsService := services.NewSchedulesService(schedsRepo)
 
 	// init handlers
 	a.userHandler = handlers.NewUserHandler(userService, a.sl)
@@ -92,6 +96,7 @@ func (a *App) initDependencies() {
 	a.personsHandler = handlers.NewPersonalitiesHandler(personService, userService, a.sl)
 	a.facultiesHandler = handlers.NewFaculHandler(faculService, userService, a.sl)
 	a.subjectsHandler = handlers.NewSubjectHandler(subjectsService, userService, a.sl)
+	a.schedulesHandler = handlers.NewSchedulesHandler(schedsService, userService, a.sl)
 
 	if a.jwtService == nil {
 		panic("jwt service is nil")

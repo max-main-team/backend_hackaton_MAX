@@ -41,7 +41,7 @@ func NewSchedulesHandler(
 // @Failure 400 {object} echo.HTTPError
 // @Failure 401 {object} echo.HTTPError
 // @Failure 500 {object} echo.HTTPError
-// @Router /admin/schedules/classes [post]
+// @Router /schedules/classes [post]
 func (h *SchedulesHandler) CreateClass(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[CreateClass] called")
@@ -79,7 +79,7 @@ func (h *SchedulesHandler) CreateClass(c echo.Context) error {
 // @Failure 400 {object} echo.HTTPError
 // @Failure 401 {object} echo.HTTPError
 // @Failure 500 {object} echo.HTTPError
-// @Router /admin/schedules/classes/{class_id} [delete]
+// @Router /schedules/classes/{class_id} [delete]
 func (h *SchedulesHandler) DeleteClass(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[DeleteClass] called")

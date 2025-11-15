@@ -22,7 +22,7 @@ func (u *uniRepository) GetUniInfoByUserID(ctx context.Context, id int64) (*mode
 	var uniData models.UniversitiesData
 
 	query := `
-        SELECT uc.name, uud.name, uud.short_name, uud.site_url, uud.description, uud.photo_url
+        SELECT uud.id, uc.name, uud.name, uud.short_name, uud.site_url, uud.description, uud.photo_url
         FROM universities.universities_data AS uud
         JOIN universities.cities AS uc ON uud.city_id = uc.id
         WHERE uud.id = (
@@ -32,7 +32,7 @@ func (u *uniRepository) GetUniInfoByUserID(ctx context.Context, id int64) (*mode
         )
     `
 
-	err := u.pool.QueryRow(ctx, query, id).Scan(&uniData.City, &uniData.Name, &uniData.ShortName, &uniData.SiteUrl, &uniData.Description, &uniData.PhotoUrl)
+	err := u.pool.QueryRow(ctx, query, id).Scan(&uniData.ID, &uniData.City, &uniData.Name, &uniData.ShortName, &uniData.SiteUrl, &uniData.Description, &uniData.PhotoUrl)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed get info about uni. err: %v", err)

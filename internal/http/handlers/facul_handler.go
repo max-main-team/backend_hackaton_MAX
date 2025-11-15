@@ -26,19 +26,19 @@ func NewFaculHandler(faculService *services.FaculService, userService *services.
 }
 
 // CreateNewFaculty godoc
-// @Summary Create new faculty
-// @Description Create a new faculty. Requires admin role. The faculty will be associated with the university of the current admin user.
-// @Tags faculties
-// @Accept json
-// @Produce json
-// @Param request body dto.CreateNewFacultyRequest true "Faculty creation data"
-// @Success 200 {object} map[string]string "Faculty created successfully"
-// @Failure 400 {object} echo.HTTPError "Invalid request data"
-// @Failure 401 {object} echo.HTTPError "Unauthorized - missing or invalid token"
-// @Failure 403 {object} echo.HTTPError "Forbidden - user is not admin"
-// @Failure 500 {object} echo.HTTPError "Internal server error"
-// @Router /admin/faculties [post]
-// @Security BearerAuth
+// @Summary      Create new faculty
+// @Description  Create a new faculty for the university. Admin role required.
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateNewFacultyRequest  true  "Faculty data"
+// @Success      200      {object}  map[string]string            "status: faculty created successfully"
+// @Failure      400      {object}  echo.HTTPError               "Invalid request body"
+// @Failure      401      {object}  echo.HTTPError               "Unauthorized user"
+// @Failure      403      {object}  echo.HTTPError               "Forbidden - user is not admin"
+// @Failure      500      {object}  echo.HTTPError               "Internal server error"
+// @Router       /admin/faculties [post]
+// @Security     BearerAuth
 func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
@@ -83,6 +83,18 @@ func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 	return c.JSON(http.StatusOK, "faculty created successfully")
 }
 
+// GetFaculties godoc
+// @Summary      Get all faculties for admin's university
+// @Description  Get all faculties for the university associated with the authenticated admin user
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}   dto.FacultyInfoResponse  "List of faculties"
+// @Failure      401  {object}  echo.HTTPError           "Unauthorized user"
+// @Failure      403  {object}  echo.HTTPError           "Forbidden - user is not admin"
+// @Failure      500  {object}  echo.HTTPError           "Internal server error"
+// @Router       /admin/faculties [get]
+// @Security     BearerAuth
 func (f *FaculHandler) GetFaculties(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)

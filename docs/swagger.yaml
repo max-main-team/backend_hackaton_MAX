@@ -132,6 +132,18 @@ definitions:
       name:
         type: string
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.LoginResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User'
+      user_roles:
+        items:
+          type: string
+        type: array
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod:
     properties:
       end_date:
@@ -196,6 +208,15 @@ definitions:
     required:
     - first_name
     - id
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UserInfoResponse:
+    properties:
+      user:
+        $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User'
+      user_roles:
+        items:
+          type: string
+        type: array
     type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_http_personalities.AcceptAccessRequest:
     properties:
@@ -275,6 +296,14 @@ definitions:
     - Student
     - Teacher
     - Admin
+  internal_http_handlers.RefreshRequest:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    required:
+    - refresh_token
+    type: object
 info:
   contact: {}
   description: API for Hackaton backend
@@ -370,13 +399,43 @@ paths:
       tags:
       - admin
   /admin/faculties:
+    get:
+      consumes:
+      - application/json
+      description: Get all faculties for the university associated with the authenticated
+        admin user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of faculties
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse'
+            type: array
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: Forbidden - user is not admin
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get all faculties for admin's university
+      tags:
+      - admin
     post:
       consumes:
       - application/json
-      description: Create a new faculty. Requires admin role. The faculty will be
-        associated with the university of the current admin user.
+      description: Create a new faculty for the university. Admin role required.
       parameters:
-      - description: Faculty creation data
+      - description: Faculty data
         in: body
         name: request
         required: true
@@ -386,17 +445,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: Faculty created successfully
+          description: 'status: faculty created successfully'
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: Invalid request data
+          description: Invalid request body
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "401":
-          description: Unauthorized - missing or invalid token
+          description: Unauthorized user
           schema:
             $ref: '#/definitions/echo.HTTPError'
         "403":
@@ -411,7 +470,7 @@ paths:
       - BearerAuth: []
       summary: Create new faculty
       tags:
-      - faculties
+      - admin
   /admin/groups:
     post:
       consumes:
@@ -459,9 +518,9 @@ paths:
     delete:
       consumes:
       - application/json
-      description: decline access request for user
+      description: Decline access request for user. Admin role required.
       parameters:
-      - description: request_id
+      - description: Request ID
         in: query
         name: request_id
         required: true
@@ -485,23 +544,25 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: reject access request
+      security:
+      - BearerAuth: []
+      summary: Reject access request
       tags:
       - personalities
     get:
       consumes:
       - application/json
-      description: Current authenticated user sends a request to get a access requests
-        to be in university (student/teacher/administration).
+      description: Get all access requests to join university (student/teacher/administration).
+        Admin role required.
       parameters:
       - default: 5
-        description: limit of requests max(50), default(5)
+        description: Limit of requests, max(50), default(5)
         in: query
         name: limit
         required: true
         type: integer
       - default: 0
-        description: offset default(0)
+        description: Offset, default(0)
         in: query
         name: offset
         required: true
@@ -525,7 +586,9 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: get all requests access for administration of university
+      security:
+      - BearerAuth: []
+      summary: Get all access requests for administration
       tags:
       - personalities
     post:
@@ -599,6 +662,109 @@ paths:
       summary: Accept Request for adding in University
       tags:
       - personalities
+  /auth/checkToken:
+    get:
+      consumes:
+      - application/json
+      description: Verify if the provided JWT access token is valid
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: token is valid'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Check JWT token validity
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Authenticate user using MAX WebApp init data and return JWT tokens
+      parameters:
+      - description: Authentication date
+        in: formData
+        name: auth_date
+        required: true
+        type: string
+      - description: Authentication hash
+        in: formData
+        name: hash
+        required: true
+        type: string
+      - description: User data JSON
+        in: formData
+        name: user
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT tokens
+          schema:
+            $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.LoginResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Invalid init data
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: User login via MAX WebApp
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access and refresh tokens using a valid refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http_handlers.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New JWT tokens
+          schema:
+            $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.LoginResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Refresh JWT tokens
+      tags:
+      - auth
   /personalities/departments:
     get:
       consumes:
@@ -804,9 +970,9 @@ paths:
     delete:
       consumes:
       - application/json
-      description: get subject by subject ID
+      description: Delete subject by subject ID. Admin role required.
       parameters:
-      - description: subject ID
+      - description: Subject ID
         in: query
         name: subject_id
         required: true
@@ -830,22 +996,24 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: delete subject
+      security:
+      - BearerAuth: []
+      summary: Delete subject
       tags:
       - subjects
     get:
       consumes:
       - application/json
-      description: get all subjects for university by university ID
+      description: Get all subjects for university by university ID with pagination
       parameters:
       - default: 5
-        description: limit of requests max(50), default(5)
+        description: Limit of requests, max(50), default(5)
         in: query
         name: limit
         required: true
         type: integer
       - default: 0
-        description: offset default(0)
+        description: Offset, default(0)
         in: query
         name: offset
         required: true
@@ -854,7 +1022,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Requests for administration
+          description: List of subjects
           schema:
             $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.SubjectsResponse'
         "400":
@@ -869,15 +1037,17 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: get all subjects by university ID
+      security:
+      - BearerAuth: []
+      summary: Get all subjects by university ID
       tags:
       - subjects
     post:
       consumes:
       - application/json
-      description: handler that provide creation of subject for university
+      description: Create a new subject for the university. Admin role required.
       parameters:
-      - description: Create request
+      - description: Subject data
         in: body
         name: request
         required: true
@@ -902,7 +1072,9 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      summary: create subject for university
+      security:
+      - BearerAuth: []
+      summary: Create subject for university
       tags:
       - subjects
   /universities/:
@@ -1067,4 +1239,30 @@ paths:
       summary: Create new semester periods for university
       tags:
       - universities
+  /user/me:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about the authenticated user including
+        roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information with roles
+          schema:
+            $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UserInfoResponse'
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get current user information
+      tags:
+      - user
 swagger: "2.0"

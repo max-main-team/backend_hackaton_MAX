@@ -29,17 +29,18 @@ func NewSubjectHandler(subjectService *services.SubjectService, userService *ser
 }
 
 // Create godoc
-// @Summary create subject for university
-// @Description handler that provide creation of subject for university
-// @Tags subjects
-// @Accept json
-// @Produce json
-// @Param request body subjects.CreateSubjectRequest true "Create request"
-// @Success 200 {object} string "ok"
-// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
-// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
-// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Summary      Create subject for university
+// @Description  Create a new subject for the university. Admin role required.
+// @Tags         subjects
+// @Accept       json
+// @Produce      json
+// @Param        request  body      subjects.CreateSubjectRequest  true  "Subject data"
+// @Success      200      {object}  string                         "ok"
+// @Failure      400      {object}  echo.HTTPError                 "Invalid request body"
+// @Failure      401      {object}  echo.HTTPError                 "Unauthorized user"
+// @Failure      500      {object}  echo.HTTPError                 "Internal server error"
 // @Router       /subjects [post]
+// @Security     BearerAuth
 func (h *SubjectHandler) Create(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
@@ -79,18 +80,19 @@ func (h *SubjectHandler) Create(c echo.Context) error {
 }
 
 // Get godoc
-// @Summary      get all subjects by university ID
-// @Description  get all subjects for university by university ID
+// @Summary      Get all subjects by university ID
+// @Description  Get all subjects for university by university ID with pagination
 // @Tags         subjects
 // @Accept       json
 // @Produce      json
-// @Param        limit  query   int  true  "limit of requests max(50), default(5)"
-// @Param		offset 	query 	int 	true "offset default(0)"
-// @Success      200   {object}  subjects.SubjectsResponse "Requests for administration"
-// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
-// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
-// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Param        limit   query     int                        true   "Limit of requests, max(50), default(5)"
+// @Param        offset  query     int                        true   "Offset, default(0)"
+// @Success      200     {object}  subjects.SubjectsResponse  "List of subjects"
+// @Failure      400     {object}  echo.HTTPError             "Invalid request body"
+// @Failure      401     {object}  echo.HTTPError             "Unauthorized user"
+// @Failure      500     {object}  echo.HTTPError             "Internal server error"
 // @Router       /subjects [get]
+// @Security     BearerAuth
 func (h *SubjectHandler) Get(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[Get] Get subject called")
@@ -140,17 +142,18 @@ func (h *SubjectHandler) Get(c echo.Context) error {
 }
 
 // Delete godoc
-// @Summary      delete subject
-// @Description  get subject by subject ID
+// @Summary      Delete subject
+// @Description  Delete subject by subject ID. Admin role required.
 // @Tags         subjects
 // @Accept       json
 // @Produce      json
-// @Param        subject_id  query   int  true  "subject ID"
-// @Success      200   {object}  string "ok"
-// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
-// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
-// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Param        subject_id  query     int             true  "Subject ID"
+// @Success      200         {object}  string          "ok"
+// @Failure      400         {object}  echo.HTTPError  "Invalid request body"
+// @Failure      401         {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      500         {object}  echo.HTTPError  "Internal server error"
 // @Router       /subjects [delete]
+// @Security     BearerAuth
 func (h *SubjectHandler) Delete(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 

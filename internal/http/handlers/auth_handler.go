@@ -55,6 +55,20 @@ type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
+// Login godoc
+// @Summary      User login via MAX WebApp
+// @Description  Authenticate user using MAX WebApp init data and return JWT tokens
+// @Tags         auth
+// @Accept       x-www-form-urlencoded
+// @Produce      json
+// @Param        auth_date  formData  string  true  "Authentication date"
+// @Param        hash       formData  string  true  "Authentication hash"
+// @Param        user       formData  string  false "User data JSON"
+// @Success      200        {object}  dto.LoginResponse  "JWT tokens"
+// @Failure      400        {object}  echo.HTTPError     "Invalid request data"
+// @Failure      401        {object}  echo.HTTPError     "Invalid init data"
+// @Failure      500        {object}  echo.HTTPError     "Internal server error"
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
@@ -236,6 +250,18 @@ func (h *AuthHandler) validateMAXData(form url.Values, receivedHash string) bool
 	return calculatedHash == receivedHash
 }
 
+// Refresh godoc
+// @Summary      Refresh JWT tokens
+// @Description  Refresh access and refresh tokens using a valid refresh token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      RefreshRequest      true  "Refresh token"
+// @Success      200      {object}  dto.LoginResponse   "New JWT tokens"
+// @Failure      400      {object}  echo.HTTPError      "Invalid request body"
+// @Failure      401      {object}  echo.HTTPError      "Invalid or expired refresh token"
+// @Failure      500      {object}  echo.HTTPError      "Internal server error"
+// @Router       /auth/refresh [post]
 func (h *AuthHandler) Refresh(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)
@@ -327,6 +353,17 @@ type UserInfo struct {
 	UserID    int
 }
 
+// CheckToken godoc
+// @Summary      Check JWT token validity
+// @Description  Verify if the provided JWT access token is valid
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]string  "status: token is valid"
+// @Failure      401  {object}  echo.HTTPError     "Unauthorized - invalid or missing token"
+// @Failure      500  {object}  echo.HTTPError     "Internal server error"
+// @Router       /auth/checkToken [get]
+// @Security     BearerAuth
 func (h *AuthHandler) CheckToken(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 

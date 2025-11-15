@@ -84,17 +84,18 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 }
 
 // RejectRequestAccess godoc
-// @Summary reject access request
-// @Description decline access request for user
-// @Tags personalities
-// @Accept json
-// @Produce json
-// @Param request_id query int true "request_id"
-// @Success      200   {object}  string  "ok"
-// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
-// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
-// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Summary      Reject access request
+// @Description  Decline access request for user. Admin role required.
+// @Tags         personalities
+// @Accept       json
+// @Produce      json
+// @Param        request_id  query     int             true  "Request ID"
+// @Success      200         {object}  string          "ok"
+// @Failure      400         {object}  echo.HTTPError  "Invalid request body"
+// @Failure      401         {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      500         {object}  echo.HTTPError  "Internal server error"
 // @Router       /admin/personalities/access [delete]
+// @Security     BearerAuth
 func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 
@@ -139,18 +140,19 @@ func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 }
 
 // GetRequests godoc
-// @Summary      get all requests access for administration of university
-// @Description  Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).
+// @Summary      Get all access requests for administration
+// @Description  Get all access requests to join university (student/teacher/administration). Admin role required.
 // @Tags         personalities
 // @Accept       json
 // @Produce      json
-// @Param        limit  query   int  true  "limit of requests max(50), default(5)"
-// @Param		offset 	query 	int 	true "offset default(0)"
-// @Success      200   {object}  personalities2.AccessRequestResponse  "Requests for administration"
-// @Failure      400   {object}  echo.HTTPError  "Invalid request body"
-// @Failure      401   {object}  echo.HTTPError  "Unauthorized user"
-// @Failure      500   {object}  echo.HTTPError  "Internal server error"
+// @Param        limit   query     int                                   true  "Limit of requests, max(50), default(5)"
+// @Param        offset  query     int                                   true  "Offset, default(0)"
+// @Success      200     {object}  personalities2.AccessRequestResponse  "Requests for administration"
+// @Failure      400     {object}  echo.HTTPError                        "Invalid request body"
+// @Failure      401     {object}  echo.HTTPError                        "Unauthorized user"
+// @Failure      500     {object}  echo.HTTPError                        "Internal server error"
 // @Router       /admin/personalities/access [get]
+// @Security     BearerAuth
 func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
 

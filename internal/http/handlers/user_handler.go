@@ -23,6 +23,17 @@ func NewUserHandler(service *services.UserService, logger embedlog.Logger) *User
 	}
 }
 
+// GetUserInfo godoc
+// @Summary      Get current user information
+// @Description  Get detailed information about the authenticated user including roles
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  dto.UserInfoResponse  "User information with roles"
+// @Failure      401  {object}  echo.HTTPError        "Unauthorized user"
+// @Failure      500  {object}  echo.HTTPError        "Internal server error"
+// @Router       /user/me [get]
+// @Security     BearerAuth
 func (u *UserHandler) GetUserInfo(c echo.Context) error {
 
 	log := c.Get("logger").(embedlog.Logger)

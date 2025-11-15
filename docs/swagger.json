@@ -141,13 +141,13 @@
             }
         },
         "/admin/faculties": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new faculty. Requires admin role. The faculty will be associated with the university of the current admin user.",
+                "description": "Get all faculties for the university associated with the authenticated admin user",
                 "consumes": [
                     "application/json"
                 ],
@@ -155,12 +155,59 @@
                     "application/json"
                 ],
                 "tags": [
-                    "faculties"
+                    "admin"
+                ],
+                "summary": "Get all faculties for admin's university",
+                "responses": {
+                    "200": {
+                        "description": "List of faculties",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.FacultyInfoResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - user is not admin",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new faculty for the university. Admin role required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
                 ],
                 "summary": "Create new faculty",
                 "parameters": [
                     {
-                        "description": "Faculty creation data",
+                        "description": "Faculty data",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -171,7 +218,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Faculty created successfully",
+                        "description": "status: faculty created successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -180,13 +227,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request data",
+                        "description": "Invalid request body",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized - missing or invalid token",
+                        "description": "Unauthorized user",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -274,7 +321,12 @@
         },
         "/admin/personalities/access": {
             "get": {
-                "description": "Current authenticated user sends a request to get a access requests to be in university (student/teacher/administration).",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all access requests to join university (student/teacher/administration). Admin role required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -284,12 +336,12 @@
                 "tags": [
                     "personalities"
                 ],
-                "summary": "get all requests access for administration of university",
+                "summary": "Get all access requests for administration",
                 "parameters": [
                     {
                         "type": "integer",
                         "default": 5,
-                        "description": "limit of requests max(50), default(5)",
+                        "description": "Limit of requests, max(50), default(5)",
                         "name": "limit",
                         "in": "query",
                         "required": true
@@ -297,7 +349,7 @@
                     {
                         "type": "integer",
                         "default": 0,
-                        "description": "offset default(0)",
+                        "description": "Offset, default(0)",
                         "name": "offset",
                         "in": "query",
                         "required": true
@@ -381,7 +433,12 @@
                 }
             },
             "delete": {
-                "description": "decline access request for user",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Decline access request for user. Admin role required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -391,11 +448,11 @@
                 "tags": [
                     "personalities"
                 ],
-                "summary": "reject access request",
+                "summary": "Reject access request",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "request_id",
+                        "description": "Request ID",
                         "name": "request_id",
                         "in": "query",
                         "required": true
@@ -468,6 +525,164 @@
                     },
                     "401": {
                         "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/checkToken": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Verify if the provided JWT access token is valid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Check JWT token validity",
+                "responses": {
+                    "200": {
+                        "description": "status: token is valid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate user using MAX WebApp init data and return JWT tokens",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User login via MAX WebApp",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authentication date",
+                        "name": "auth_date",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authentication hash",
+                        "name": "hash",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User data JSON",
+                        "name": "user",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JWT tokens",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid init data",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Refresh access and refresh tokens using a valid refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh JWT tokens",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_http_handlers.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New JWT tokens",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -786,7 +1001,12 @@
         },
         "/subjects": {
             "get": {
-                "description": "get all subjects for university by university ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all subjects for university by university ID with pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -796,12 +1016,12 @@
                 "tags": [
                     "subjects"
                 ],
-                "summary": "get all subjects by university ID",
+                "summary": "Get all subjects by university ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "default": 5,
-                        "description": "limit of requests max(50), default(5)",
+                        "description": "Limit of requests, max(50), default(5)",
                         "name": "limit",
                         "in": "query",
                         "required": true
@@ -809,7 +1029,7 @@
                     {
                         "type": "integer",
                         "default": 0,
-                        "description": "offset default(0)",
+                        "description": "Offset, default(0)",
                         "name": "offset",
                         "in": "query",
                         "required": true
@@ -817,7 +1037,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Requests for administration",
+                        "description": "List of subjects",
                         "schema": {
                             "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.SubjectsResponse"
                         }
@@ -843,7 +1063,12 @@
                 }
             },
             "post": {
-                "description": "handler that provide creation of subject for university",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new subject for the university. Admin role required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -853,10 +1078,10 @@
                 "tags": [
                     "subjects"
                 ],
-                "summary": "create subject for university",
+                "summary": "Create subject for university",
                 "parameters": [
                     {
-                        "description": "Create request",
+                        "description": "Subject data",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -893,7 +1118,12 @@
                 }
             },
             "delete": {
-                "description": "get subject by subject ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete subject by subject ID. Admin role required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -903,11 +1133,11 @@
                 "tags": [
                     "subjects"
                 ],
-                "summary": "delete subject",
+                "summary": "Delete subject",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "subject ID",
+                        "description": "Subject ID",
                         "name": "subject_id",
                         "in": "query",
                         "required": true
@@ -1190,6 +1420,46 @@
                     }
                 }
             }
+        },
+        "/user/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get detailed information about the authenticated user including roles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get current user information",
+                "responses": {
+                    "200": {
+                        "description": "User information with roles",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UserInfoResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1388,6 +1658,24 @@
                 }
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user": {
+                    "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User"
+                },
+                "user_roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.SemesterPeriod": {
             "type": "object",
             "required": [
@@ -1473,6 +1761,20 @@
                 "username": {
                     "type": "string",
                     "example": "johndoe"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.UserInfoResponse": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.User"
+                },
+                "user_roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1593,6 +1895,18 @@
                 "Teacher",
                 "Admin"
             ]
+        },
+        "internal_http_handlers.RefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
         }
     }
 }

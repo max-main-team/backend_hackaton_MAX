@@ -79,8 +79,7 @@ ALTER TYPE schedules.day_type OWNER TO max_superuser;
 
 CREATE TYPE schedules.interval_type AS ENUM (
     'every week',
-    'every two week',
-    'every month'
+    'every two week'
 );
 
 

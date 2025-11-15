@@ -123,6 +123,19 @@ func (u *UniService) CreateNewCourse(ctx context.Context, startDate, endDate tim
 	return nil
 }
 
+func (u *UniService) GetAllCoursesByUniversityID(ctx context.Context, universityID int64) ([]models.Course, error) {
+	if universityID <= 0 {
+		return nil, fmt.Errorf("invalid university ID")
+	}
+
+	courses, err := u.uniRepo.GetAllCoursesByUniversityID(ctx, universityID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get courses: %w", err)
+	}
+
+	return courses, nil
+}
+
 func (u *UniService) CreateNewGroup(ctx context.Context, groupName string, courseID int64) error {
 	if groupName == "" {
 		return fmt.Errorf("group name cannot be empty")

@@ -345,6 +345,75 @@ func (u *UniHandler) CreateNewCourse(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"status": "course created successfully"})
 }
 
+// GetAllCourses godoc
+// @Summary      Get all courses for university
+// @Description  Get all courses for the admin's university. Admin role required.
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}   dto.CourseInfoResponse  "List of courses"
+// @Failure      401  {object}  echo.HTTPError          "Unauthorized user"
+// @Failure      403  {object}  echo.HTTPError          "Forbidden - user is not admin"
+// @Failure      500  {object}  echo.HTTPError          "Internal server error"
+// @Router       /admin/courses [get]
+// @Security     BearerAuth
+func (u *UniHandler) GetAllCourses(c echo.Context) error {
+	ctx := c.Request().Context()
+	log := c.Get("logger").(embedlog.Logger)
+
+	log.Print(context.Background(), "[GetAllCourses] GetAllCourses called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[GetAllCourses] Authentication error. user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	roles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
+	if err != nil {
+		log.Errorf("[GetAllCourses] fail to get user roles. err: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+	}
+
+	isAdmin := false
+	for _, role := range roles.Roles {
+		if role == "admin" {
+			isAdmin = true
+			break
+		}
+	}
+	if !isAdmin {
+		log.Errorf("[GetAllCourses] permission denied for user id %d", currentUser.ID)
+		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
+	}
+
+	// Получаем university_id из администратора
+	uniInfo, err := u.uniService.GetInfoAboutUni(ctx, currentUser.ID)
+	if err != nil {
+		log.Errorf("[GetAllCourses] failed to get university info: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get university info")
+	}
+
+	courses, err := u.uniService.GetAllCoursesByUniversityID(ctx, int64(uniInfo.ID))
+	if err != nil {
+		log.Errorf("[GetAllCourses] failed to get courses: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get courses")
+	}
+
+	// Конвертируем в DTO
+	var response []dto.CourseInfoResponse
+	for _, course := range courses {
+		response = append(response, dto.CourseInfoResponse{
+			ID:                   course.ID,
+			StartDate:            course.StartDate.Format("2006-01-02"),
+			EndDate:              course.EndDate.Format("2006-01-02"),
+			UniversityDepartment: course.UniversityDepartment,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
 // CreateNewGroup godoc
 // @Summary      Create new course group
 // @Description  Create a new course group for a specific course. Creates entry in groups.course_groups. Admin role required.

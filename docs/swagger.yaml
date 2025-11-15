@@ -4,6 +4,17 @@ definitions:
     properties:
       message: {}
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CourseInfoResponse:
+    properties:
+      end_date:
+        type: string
+      id:
+        type: integer
+      start_date:
+        type: string
+      university_department_id:
+        type: integer
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CreateCourseRequest:
     properties:
       end_date:
@@ -311,6 +322,36 @@ info:
   version: "1.0"
 paths:
   /admin/courses:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses for the admin's university. Admin role required.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of courses
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_http_dto.CourseInfoResponse'
+            type: array
+        "401":
+          description: Unauthorized user
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "403":
+          description: Forbidden - user is not admin
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get all courses for university
+      tags:
+      - admin
     post:
       consumes:
       - application/json

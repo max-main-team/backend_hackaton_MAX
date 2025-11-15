@@ -169,6 +169,39 @@ func (u *uniRepository) CreateNewCourse(ctx context.Context, startDate, endDate 
 	return nil
 }
 
+func (u *uniRepository) GetAllCoursesByUniversityID(ctx context.Context, universityID int64) ([]models.Course, error) {
+	var courses []models.Course
+
+	query := `
+		SELECT c.id, c.start_date, c.end_date, c.university_department_id
+		FROM universities.courses c
+		JOIN universities.university_departments ud ON c.university_department_id = ud.id
+		WHERE ud.university_id = $1
+		ORDER BY c.start_date DESC
+	`
+
+	rows, err := u.pool.Query(ctx, query, universityID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get courses: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var course models.Course
+		err := rows.Scan(&course.ID, &course.StartDate, &course.EndDate, &course.UniversityDepartment)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan course row: %w", err)
+		}
+		courses = append(courses, course)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return courses, nil
+}
+
 func (u *uniRepository) CreateNewGroup(ctx context.Context, groupName string, courseID int64) error {
 	query := `
 		INSERT INTO groups.course_groups (name, course_id)

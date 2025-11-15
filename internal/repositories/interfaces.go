@@ -35,6 +35,8 @@ type UniRepository interface {
 
 	CreateNewCourse(ctx context.Context, startDate, endDate time.Time, universityDepartmentID int64) error
 
+	GetAllCoursesByUniversityID(ctx context.Context, universityID int64) ([]models.Course, error)
+
 	CreateNewGroup(ctx context.Context, groupName string, courseID int64) error
 
 	CreateNewEvent(ctx context.Context, event models.Event) error

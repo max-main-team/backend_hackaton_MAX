@@ -152,6 +152,7 @@ func NewRouter(logger embedlog.Logger,
 	// courses
 	courses := admin.Group("/courses")
 	courses.POST("", uniHandler.CreateNewCourse)
+	courses.GET("", uniHandler.GetAllCourses)
 
 	// groups
 	groups := admin.Group("/groups")

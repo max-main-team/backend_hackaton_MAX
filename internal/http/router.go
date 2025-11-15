@@ -66,21 +66,18 @@ func NewRouter(logger embedlog.Logger,
 		ExposeHeaders:    []string{"Set-Cookie"},
 	}))
 
-	// Middleware для установки таймаута на каждый запрос
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// Устанавливаем таймаут 30 секунд для каждого запроса
-			ctx, cancel := context.WithTimeout(c.Request().Context(), 30*time.Second)
+
+			ctx, cancel := context.WithTimeout(c.Request().Context(), 120*time.Second)
 			defer cancel()
 
-			// Заменяем контекст в запросе
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			return next(c)
 		}
 	})
 
-	// Middleware для логгера
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Set("logger", logger)

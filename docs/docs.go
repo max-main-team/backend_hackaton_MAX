@@ -1188,6 +1188,110 @@ const docTemplate = `{
                 }
             }
         },
+        "/schedules/lessons": {
+            "post": {
+                "description": "Создать занятие для учебной группы или элективной группы. Учёт конфликтов, лекций и интервалов.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Create lesson (group schedule entry)",
+                "parameters": [
+                    {
+                        "description": "Lesson info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "409": {
+                        "description": "Schedule conflict",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules/lessons/{lesson_id}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Delete lesson",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Lesson ID",
+                        "name": "lesson_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid lesson_id",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/schedules/rooms": {
             "get": {
                 "produces": [
@@ -1316,6 +1420,56 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules/users/{user_id}": {
+            "get": {
+                "description": "Возвращает расписание пользователя по max_user_id (и как студента, и как преподавателя).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Get weekly schedule for user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "MAX user id",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.LessonsResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user_id",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
                         }
@@ -2228,6 +2382,33 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateLessonRequest": {
+            "type": "object",
+            "properties": {
+                "class_id": {
+                    "description": "schedules.classes.id",
+                    "type": "integer"
+                },
+                "course_group_subject_id": {
+                    "type": "integer"
+                },
+                "day": {
+                    "description": "schedules.day_type",
+                    "type": "string"
+                },
+                "elective_group_subject_id": {
+                    "type": "integer"
+                },
+                "interval": {
+                    "description": "schedules.interval_type",
+                    "type": "string"
+                },
+                "room_id": {
+                    "description": "schedules.rooms.id",
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateRoomRequest": {
             "type": "object",
             "properties": {
@@ -2235,6 +2416,69 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "university_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.LessonItem": {
+            "type": "object",
+            "properties": {
+                "day": {
+                    "description": "monday..sunday",
+                    "type": "string"
+                },
+                "end_time": {
+                    "description": "HH:MM",
+                    "type": "string"
+                },
+                "interval": {
+                    "description": "every week / every two week",
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "integer"
+                },
+                "pair_number": {
+                    "type": "integer"
+                },
+                "room": {
+                    "type": "string"
+                },
+                "room_id": {
+                    "type": "integer"
+                },
+                "start_time": {
+                    "description": "HH:MM",
+                    "type": "string"
+                },
+                "subject_name": {
+                    "type": "string"
+                },
+                "subject_type": {
+                    "description": "lecture/practice/etc",
+                    "type": "string"
+                },
+                "teacher_first_name": {
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "type": "integer"
+                },
+                "teacher_last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.LessonsResponse": {
+            "type": "object",
+            "properties": {
+                "schedule": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.LessonItem"
+                    }
+                },
+                "user_id": {
                     "type": "integer"
                 }
             }

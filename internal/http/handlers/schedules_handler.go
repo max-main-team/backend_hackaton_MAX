@@ -3,12 +3,14 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/models/http/schedules"
+	"github.com/max-main-team/backend_hackaton_MAX/internal/repositories"
 	"github.com/max-main-team/backend_hackaton_MAX/internal/services"
 	"github.com/vmkteam/embedlog"
 )
@@ -259,4 +261,143 @@ func (h *SchedulesHandler) GetRoomsByUniversity(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, rooms)
+}
+
+// CreateLesson godoc
+// @Summary      Create lesson (group schedule entry)
+// @Description  Создать занятие для учебной группы или элективной группы. Учёт конфликтов, лекций и интервалов.
+// @Tags         schedules
+// @Accept       json
+// @Produce      json
+// @Param        request  body      schedules.CreateLessonRequest  true  "Lesson info"
+// @Success      200      {object}  string    "id"
+// @Failure      400      {object}  echo.HTTPError       "Invalid request body"
+// @Failure      401      {object}  echo.HTTPError       "Unauthorized user"
+// @Failure      409      {object}  echo.HTTPError       "Schedule conflict"
+// @Failure      500      {object}  echo.HTTPError       "Internal server error"
+// @Router       /schedules/lessons [post]
+func (h *SchedulesHandler) CreateLesson(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[CreateLesson] called")
+
+	_, err := h.requireAdmin(c)
+	if err != nil {
+		return err
+	}
+
+	var req schedules.CreateLessonRequest
+	if err := json.NewDecoder(c.Request().Body).Decode(&req); err != nil {
+		log.Errorf("[CreateLesson] decode error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+	}
+
+	if (req.CourseGroupSubjectID == nil && req.ElectiveGroupSubjectID == nil) ||
+		(req.CourseGroupSubjectID != nil && req.ElectiveGroupSubjectID != nil) {
+		return echo.NewHTTPError(http.StatusBadRequest, "exactly one of course_group_subject_id or elective_group_subject_id must be set")
+	}
+
+	lessonID, err := h.schedulesServ.CreateLesson(context.Background(), req)
+	if err != nil {
+		if errors.Is(err, repositories.ErrScheduleConflict) {
+			log.Errorf("[CreateLesson] schedule conflict: %v", err)
+			return echo.NewHTTPError(http.StatusConflict, "schedule conflict (group/teacher/student/room)")
+		}
+		log.Errorf("[CreateLesson] service error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create lesson")
+	}
+
+	return c.JSON(http.StatusOK, lessonID)
+}
+
+// DeleteLesson godoc
+// @Summary      Delete lesson
+// @Tags         schedules
+// @Produce      json
+// @Param        lesson_id  path      int  true  "Lesson ID"
+// @Success      200        {object}  string  "ok"
+// @Failure      400        {object}  echo.HTTPError  "Invalid lesson_id"
+// @Failure      401        {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      500        {object}  echo.HTTPError  "Internal server error"
+// @Router       /schedules/lessons/{lesson_id} [delete]
+func (h *SchedulesHandler) DeleteLesson(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[DeleteLesson] called")
+
+	_, err := h.requireAdmin(c)
+	if err != nil {
+		return err
+	}
+
+	lessonIDStr := c.Param("lesson_id")
+	lessonID, err := strconv.ParseInt(lessonIDStr, 10, 64)
+	if err != nil {
+		log.Errorf("[DeleteLesson] parse lesson_id error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid lesson_id")
+	}
+
+	if err := h.schedulesServ.DeleteLesson(context.Background(), lessonID); err != nil {
+		log.Errorf("[DeleteLesson] service error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete lesson")
+	}
+
+	return c.JSON(http.StatusOK, "ok")
+}
+
+// GetUserSchedule godoc
+// @Summary      Get weekly schedule for user
+// @Description  Возвращает расписание пользователя по max_user_id (и как студента, и как преподавателя).
+// @Tags         schedules
+// @Produce      json
+// @Param        user_id  path      int  true  "MAX user id"
+// @Success      200      {array}  	schedules.LessonsResponse
+// @Failure      400      {object}  echo.HTTPError  "Invalid user_id"
+// @Failure      401      {object}  echo.HTTPError  "Unauthorized user"
+// @Failure      500      {object}  echo.HTTPError  "Internal server error"
+// @Router       /schedules/users/{user_id} [get]
+func (h *SchedulesHandler) GetUserSchedule(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[GetUserSchedule] called")
+
+	currentUser, ok := c.Get("user").(*models.User)
+	if !ok {
+		log.Errorf("[GetUserSchedule] user not found in context")
+		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
+	}
+
+	userIDStr := c.Param("user_id")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		log.Errorf("[GetUserSchedule] parse user_id error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid user_id")
+	}
+
+	// Разрешаем либо самому себе, либо админу.
+	if currentUser.ID != userID {
+		roles, err := h.userServ.GetUserRolesByID(context.Background(), currentUser.ID)
+		if err != nil {
+			log.Errorf("[GetUserSchedule] GetUserRolesByID error: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
+		}
+
+		isAdmin := false
+		for _, r := range roles.Roles {
+			if r == "admin" {
+				isAdmin = true
+				break
+			}
+		}
+
+		if !isAdmin {
+			log.Errorf("[GetUserSchedule] user is not owner and not admin")
+			return echo.NewHTTPError(http.StatusUnauthorized, "user is not allowed to view this schedule")
+		}
+	}
+
+	schedule, err := h.schedulesServ.GetUserSchedule(context.Background(), userID)
+	if err != nil {
+		log.Errorf("[GetUserSchedule] service error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user schedule")
+	}
+
+	return c.JSON(http.StatusOK, schedule)
 }

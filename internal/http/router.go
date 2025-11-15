@@ -172,5 +172,8 @@ func NewRouter(logger embedlog.Logger,
 	schedules.DELETE("/rooms/{room_id}", schedulesHandler.DeleteRoom)
 	schedules.POST("/rooms", schedulesHandler.CreateRoom)
 	schedules.GET("/rooms", schedulesHandler.GetRoomsByUniversity)
+	schedules.POST("/lessons", schedulesHandler.CreateLesson)
+	schedules.DELETE("/lessons/{lesson_id}", schedulesHandler.DeleteLesson)
+	schedules.GET("/users/{user_id}", schedulesHandler.GetUserSchedule)
 	return e
 }

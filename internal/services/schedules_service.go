@@ -79,3 +79,47 @@ func (s *SchedulesService) GetRoomsByUniversity(ctx context.Context, universityI
 
 	return roomsResponse, nil
 }
+
+func (s *SchedulesService) CreateLesson(ctx context.Context, req schedules.CreateLessonRequest) (int64, error) {
+	r := schedules2.CreateLesson{
+		CourseGroupSubjectID:   req.CourseGroupSubjectID,
+		ElectiveGroupSubjectID: req.ElectiveGroupSubjectID,
+		Day:                    schedules2.DayType(req.Day),
+		ClassID:                req.ClassID,
+		RoomID:                 req.RoomID,
+		Interval:               schedules2.IntervalType(req.Interval),
+	}
+	return s.repo.CreateLesson(ctx, r)
+}
+
+func (s *SchedulesService) DeleteLesson(ctx context.Context, lessonID int64) error {
+	return s.repo.DeleteLesson(ctx, lessonID)
+}
+
+func (s *SchedulesService) GetUserSchedule(ctx context.Context, userID int64) (schedules.LessonsResponse, error) {
+	lessons, err := s.repo.GetUserSchedule(ctx, userID)
+	if err != nil {
+		return schedules.LessonsResponse{}, err
+	}
+
+	var lessonResponse schedules.LessonsResponse
+
+	for _, lesson := range lessons {
+		lessonResponse.Schedule = append(lessonResponse.Schedule, schedules.LessonItem{
+			LessonID:         lesson.LessonID,
+			Day:              lesson.Day,
+			Interval:         lesson.Interval,
+			PairNumber:       lesson.PairNumber,
+			StartTime:        lesson.StartTime,
+			EndTime:          lesson.EndTime,
+			RoomID:           lesson.RoomID,
+			Room:             lesson.Room,
+			SubjectName:      lesson.SubjectName,
+			SubjectType:      lesson.SubjectType,
+			TeacherID:        lesson.TeacherID,
+			TeacherFirstName: lesson.TeacherFirstName,
+			TeacherLastName:  lesson.TeacherLastName,
+		})
+	}
+	return lessonResponse, nil
+}

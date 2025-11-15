@@ -300,6 +300,22 @@ definitions:
       university_id:
         type: integer
     type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateRoomRequest:
+    properties:
+      room:
+        type: string
+      university_id:
+        type: integer
+    type: object
+  github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.RoomsResponse:
+    properties:
+      id:
+        type: integer
+      room:
+        type: string
+      university_id:
+        type: integer
+    type: object
   github_com_max-main-team_backend_hackaton_MAX_internal_models_http_subjects.CreateSubjectRequest:
     properties:
       name:
@@ -1117,6 +1133,94 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: delete class
+      tags:
+      - schedules
+  /schedules/rooms:
+    get:
+      parameters:
+      - description: University ID
+        in: query
+        name: university_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.RoomsResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: get rooms for university
+      tags:
+      - schedules
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Room info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: id
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: create room
+      tags:
+      - schedules
+  /schedules/rooms/{room_id}:
+    delete:
+      parameters:
+      - description: Room ID
+        in: path
+        name: room_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: delete room
       tags:
       - schedules
   /subjects:

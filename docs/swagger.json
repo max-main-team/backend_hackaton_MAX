@@ -1181,6 +1181,141 @@
                 }
             }
         },
+        "/schedules/rooms": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "get rooms for university",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "University ID",
+                        "name": "university_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.RoomsResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "create room",
+                "parameters": [
+                    {
+                        "description": "Room info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateRoomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules/rooms/{room_id}": {
+            "delete": {
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "delete room",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Room ID",
+                        "name": "room_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/subjects": {
             "get": {
                 "security": [
@@ -2079,6 +2214,31 @@
                     "type": "integer"
                 },
                 "start_time": {
+                    "type": "string"
+                },
+                "university_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.CreateRoomRequest": {
+            "type": "object",
+            "properties": {
+                "room": {
+                    "type": "string"
+                },
+                "university_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_max-main-team_backend_hackaton_MAX_internal_models_http_schedules.RoomsResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "room": {
                     "type": "string"
                 },
                 "university_id": {

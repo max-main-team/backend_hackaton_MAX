@@ -73,4 +73,8 @@ type SchedulesRepository interface {
 	CreateClass(ctx context.Context, class schedules.Class) (int64, error)
 	DeleteClass(ctx context.Context, classID int64) error
 	GetClassesByUniversity(ctx context.Context, universityID int64) ([]schedules.Class, error)
+
+	CreateRoom(ctx context.Context, room schedules.Room) (int64, error)
+	DeleteRoom(ctx context.Context, roomID int64) error
+	GetRoomsByUniversity(ctx context.Context, universityID int64) ([]schedules.Room, error)
 }

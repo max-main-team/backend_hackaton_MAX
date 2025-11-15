@@ -9,3 +9,9 @@ type Class struct {
 	StartTime    time.Time
 	EndTime      time.Time
 }
+
+type Room struct {
+	ID           int64
+	UniversityID int64
+	Room         string
+}

@@ -68,7 +68,7 @@ func (h *SchedulesHandler) CreateClass(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]int64{"id": id})
+	return c.JSON(http.StatusOK, id)
 }
 
 // DeleteClass godoc
@@ -162,4 +162,101 @@ func (h *SchedulesHandler) requireAdmin(c echo.Context) (*models.User, error) {
 	}
 
 	return currentUser, nil
+}
+
+// CreateRoom godoc
+// @Summary create room
+// @Tags schedules
+// @Accept json
+// @Produce json
+// @Param request body schedules.CreateRoomRequest true "Room info"
+// @Success 200 {object} string "id"
+// @Failure 400 {object} echo.HTTPError
+// @Failure 401 {object} echo.HTTPError
+// @Failure 500 {object} echo.HTTPError
+// @Router /schedules/rooms [post]
+func (h *SchedulesHandler) CreateRoom(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[CreateRoom] called")
+
+	_, err := h.requireAdmin(c)
+	if err != nil {
+		return err
+	}
+
+	var req schedules.CreateRoomRequest
+	if err := json.NewDecoder(c.Request().Body).Decode(&req); err != nil {
+		log.Errorf("[CreateRoom] decode error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	id, err := h.schedulesServ.CreateRoom(context.TODO(), req)
+	if err != nil {
+		log.Errorf("[CreateRoom] service error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, id)
+}
+
+// DeleteRoom godoc
+// @Summary delete room
+// @Tags schedules
+// @Param room_id path int true "Room ID"
+// @Success 200 {object} string "ok"
+// @Failure 400 {object} echo.HTTPError
+// @Failure 401 {object} echo.HTTPError
+// @Failure 500 {object} echo.HTTPError
+// @Router /schedules/rooms/{room_id} [delete]
+func (h *SchedulesHandler) DeleteRoom(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[DeleteRoom] called")
+
+	_, err := h.requireAdmin(c)
+	if err != nil {
+		return err
+	}
+
+	roomIDStr := c.Param("room_id")
+	roomID, err := strconv.ParseInt(roomIDStr, 10, 64)
+	if err != nil {
+		log.Errorf("[DeleteRoom] parse room_id error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid room_id")
+	}
+
+	if err := h.schedulesServ.DeleteRoom(context.TODO(), roomID); err != nil {
+		log.Errorf("[DeleteRoom] service error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "ok")
+}
+
+// GetRoomsByUniversity godoc
+// @Summary get rooms for university
+// @Tags schedules
+// @Produce json
+// @Param university_id query int true "University ID"
+// @Success 200 {array} schedules.RoomsResponse
+// @Failure 400 {object} echo.HTTPError
+// @Failure 500 {object} echo.HTTPError
+// @Router /schedules/rooms [get]
+func (h *SchedulesHandler) GetRoomsByUniversity(c echo.Context) error {
+	log := c.Get("logger").(embedlog.Logger)
+	log.Print(context.Background(), "[GetRoomsByUniversity] called")
+
+	universityIDStr := c.QueryParam("university_id")
+	universityID, err := strconv.ParseInt(universityIDStr, 10, 64)
+	if err != nil {
+		log.Errorf("[GetRoomsByUniversity] parse university_id error: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid university_id")
+	}
+
+	rooms, err := h.schedulesServ.GetRoomsByUniversity(context.TODO(), universityID)
+	if err != nil {
+		log.Errorf("[GetRoomsByUniversity] service error: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, rooms)
 }

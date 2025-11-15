@@ -16,3 +16,13 @@ type ClassesResponse struct {
 	StartTime    time.Time `json:"start_time"`
 	EndTime      time.Time `json:"end_time"`
 }
+
+type CreateRoomRequest struct {
+	UniversityID int64  `json:"university_id"`
+	Room         string `json:"room"`
+}
+type RoomsResponse struct {
+	ID           int64  `json:"id"`
+	UniversityID int64  `json:"university_id"`
+	Room         string `json:"room"`
+}

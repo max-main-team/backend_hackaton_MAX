@@ -50,3 +50,32 @@ func (s *SchedulesService) GetClassesByUniversity(ctx context.Context, universit
 
 	return classesResponse, nil
 }
+func (s *SchedulesService) CreateRoom(ctx context.Context, request schedules.CreateRoomRequest) (int64, error) {
+	room := schedules2.Room{
+		UniversityID: request.UniversityID,
+		Room:         request.Room,
+	}
+	return s.repo.CreateRoom(ctx, room)
+}
+
+func (s *SchedulesService) DeleteRoom(ctx context.Context, roomID int64) error {
+	return s.repo.DeleteRoom(ctx, roomID)
+}
+
+func (s *SchedulesService) GetRoomsByUniversity(ctx context.Context, universityID int64) ([]schedules.RoomsResponse, error) {
+	rooms, err := s.repo.GetRoomsByUniversity(ctx, universityID)
+	if err != nil {
+		return []schedules.RoomsResponse{}, err
+	}
+
+	var roomsResponse []schedules.RoomsResponse
+	for _, room := range rooms {
+		roomsResponse = append(roomsResponse, schedules.RoomsResponse{
+			ID:           room.ID,
+			UniversityID: room.UniversityID,
+			Room:         room.Room,
+		})
+	}
+
+	return roomsResponse, nil
+}

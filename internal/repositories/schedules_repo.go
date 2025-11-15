@@ -77,3 +77,58 @@ func (r *SchedulesRepo) GetClassesByUniversity(ctx context.Context, universityID
 
 	return result, nil
 }
+
+func (r *SchedulesRepo) CreateRoom(ctx context.Context, room schedules.Room) (int64, error) {
+	const q = `
+		INSERT INTO schedules.rooms (
+			university_id,
+			room
+		)
+		VALUES ($1, $2)
+		RETURNING id;
+	`
+
+	var id int64
+	err := r.pool.QueryRow(ctx, q, room.UniversityID, room.Room).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (r *SchedulesRepo) DeleteRoom(ctx context.Context, room_id int64) error {
+	const q = `DELETE FROM schedules.rooms WHERE id = $1`
+	_, err := r.pool.Exec(ctx, q, room_id)
+	return err
+}
+
+func (r *SchedulesRepo) GetRoomsByUniversity(ctx context.Context, universityID int64) ([]schedules.Room, error) {
+	const q = `
+		SELECT id, university_id, room
+		FROM schedules.rooms
+		WHERE university_id = $1
+		ORDER BY room;
+	`
+
+	rows, err := r.pool.Query(ctx, q, universityID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []schedules.Room
+	for rows.Next() {
+		var room schedules.Room
+		if err := rows.Scan(
+			&room.ID,
+			&room.UniversityID,
+			&room.Room,
+		); err != nil {
+			return nil, err
+		}
+		result = append(result, room)
+	}
+
+	return result, nil
+}

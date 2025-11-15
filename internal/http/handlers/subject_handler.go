@@ -43,6 +43,7 @@ func NewSubjectHandler(subjectService *services.SubjectService, userService *ser
 // @Security     BearerAuth
 func (h *SubjectHandler) Create(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
 
 	log.Print(context.Background(), "[Create] Create subject called")
 
@@ -53,7 +54,7 @@ func (h *SubjectHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := h.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := h.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[Create] GetUserRolesByID error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
@@ -71,7 +72,7 @@ func (h *SubjectHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
-	err = h.subjectService.Create(context.TODO(), request)
+	err = h.subjectService.Create(ctx, request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create subject")
 	}
@@ -95,6 +96,8 @@ func (h *SubjectHandler) Create(c echo.Context) error {
 // @Security     BearerAuth
 func (h *SubjectHandler) Get(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
+
 	log.Print(context.Background(), "[Get] Get subject called")
 
 	_, ok := c.Get("user").(*models.User)
@@ -134,7 +137,7 @@ func (h *SubjectHandler) Get(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
 
-	subs, err := h.subjectService.Get(context.TODO(), request, limitInt, offsetInt)
+	subs, err := h.subjectService.Get(ctx, request, limitInt, offsetInt)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get subject")
 	}
@@ -156,6 +159,7 @@ func (h *SubjectHandler) Get(c echo.Context) error {
 // @Security     BearerAuth
 func (h *SubjectHandler) Delete(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
 
 	log.Print(context.Background(), "[Delete] Delete subject called")
 
@@ -165,7 +169,7 @@ func (h *SubjectHandler) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := h.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := h.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[Create] GetUserRolesByID error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
@@ -190,7 +194,7 @@ func (h *SubjectHandler) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid subject id")
 	}
 
-	err = h.subjectService.Delete(context.TODO(), subjectID)
+	err = h.subjectService.Delete(ctx, subjectID)
 	if err != nil {
 		log.Errorf("[Delete] Delete subject error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete subject")

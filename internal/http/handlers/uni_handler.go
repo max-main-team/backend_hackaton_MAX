@@ -38,6 +38,7 @@ func NewUniHandler(uniService *services.UniService, userService *services.UserSe
 // @Router       /universities/info [get]
 // @Security     BearerAuth
 func (u *UniHandler) GetUniInfo(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	log := c.Get("logger").(embedlog.Logger)
 
@@ -49,7 +50,7 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
-	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
+	uniInfo, err := u.uniService.GetInfoAboutUni(ctx, currentUser.ID)
 
 	if err != nil {
 		log.Errorf("[GetUniInfo] Failed get info about uni. err: %v", err)
@@ -78,12 +79,13 @@ func (u *UniHandler) GetUniInfo(c echo.Context) error {
 // @Router       /universities/ [get]
 // @Security     BearerAuth
 func (u *UniHandler) GetAllUniversities(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[GetAllUniversities] GetAllUniversities called")
 
-	universities, err := u.uniService.GetAllUniversities(context.TODO())
+	universities, err := u.uniService.GetAllUniversities(ctx)
 
 	if err != nil {
 		log.Errorf("[GetAllUniversities] failed get all universities. err: %v", err)
@@ -121,6 +123,7 @@ func (u *UniHandler) GetAllUniversities(c echo.Context) error {
 // @Router       /universities/semesters [post]
 // @Security     BearerAuth
 func (u *UniHandler) CreateNewSemesterPeriod(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[CreateSemesters] CreateSemesters called")
@@ -136,7 +139,7 @@ func (u *UniHandler) CreateNewSemesterPeriod(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
-	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateSemesters] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -160,7 +163,7 @@ func (u *UniHandler) CreateNewSemesterPeriod(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed convert string time -> time.Time")
 	}
 
-	err = u.uniService.SetNewSemesterPeriod(context.TODO(), int64(req.ID), periods)
+	err = u.uniService.SetNewSemesterPeriod(ctx, int64(req.ID), periods)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed create semesters")
 	}
@@ -205,6 +208,7 @@ func ConvertDtoModel(dto []dto.SemesterPeriod) ([]models.SemesterPeriod, error) 
 // @Router       /admin/department [post]
 // @Security     BearerAuth
 func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[CreateNewDepartment] CreateNewDepartment called")
@@ -215,7 +219,7 @@ func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateNewDepartment] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -245,7 +249,7 @@ func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "department name is required")
 	}
 
-	err = u.uniService.CreateNewDepartment(context.TODO(), req.DepartmentName, req.DepartmentCode, req.AliasName, req.FacultyID, req.UniversityID)
+	err = u.uniService.CreateNewDepartment(ctx, req.DepartmentName, req.DepartmentCode, req.AliasName, req.FacultyID, req.UniversityID)
 	if err != nil {
 		log.Errorf("[CreateNewDepartment] failed to create new department: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new department")
@@ -269,6 +273,7 @@ func (u *UniHandler) CreateNewDepartment(c echo.Context) error {
 // @Router       /admin/courses [post]
 // @Security     BearerAuth
 func (u *UniHandler) CreateNewCourse(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[CreateNewCourse] CreateNewCourse called")
@@ -279,7 +284,7 @@ func (u *UniHandler) CreateNewCourse(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateNewCourse] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -331,7 +336,7 @@ func (u *UniHandler) CreateNewCourse(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid end date format, use YYYY-MM-DD")
 	}
 
-	err = u.uniService.CreateNewCourse(context.TODO(), startDate, endDate, req.UniversityDepartment)
+	err = u.uniService.CreateNewCourse(ctx, startDate, endDate, req.UniversityDepartment)
 	if err != nil {
 		log.Errorf("[CreateNewCourse] failed to create new course: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new course")
@@ -355,6 +360,7 @@ func (u *UniHandler) CreateNewCourse(c echo.Context) error {
 // @Router       /admin/groups [post]
 // @Security     BearerAuth
 func (u *UniHandler) CreateNewGroup(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[CreateNewGroup] CreateNewGroup called")
@@ -365,7 +371,7 @@ func (u *UniHandler) CreateNewGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateNewGroup] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -400,7 +406,7 @@ func (u *UniHandler) CreateNewGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "course ID is required")
 	}
 
-	err = u.uniService.CreateNewGroup(context.TODO(), req.GroupName, req.CourseID)
+	err = u.uniService.CreateNewGroup(ctx, req.GroupName, req.CourseID)
 	if err != nil {
 		log.Errorf("[CreateNewGroup] failed to create new group: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create new group")
@@ -421,6 +427,7 @@ func (u *UniHandler) CreateNewGroup(c echo.Context) error {
 // @Router       /universities/events [get]
 // @Security     BearerAuth
 func (u *UniHandler) GetAllEvents(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[GetAllEvents] GetAllEvents called")
@@ -431,13 +438,13 @@ func (u *UniHandler) GetAllEvents(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
+	uniInfo, err := u.uniService.GetInfoAboutUni(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[GetAllEvents] failed to get university info. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get university info")
 	}
 
-	events, err := u.uniService.GetAllEventsByUniversityID(context.TODO(), int64(uniInfo.ID))
+	events, err := u.uniService.GetAllEventsByUniversityID(ctx, int64(uniInfo.ID))
 	if err != nil {
 		log.Errorf("[GetAllEvents] failed to get events. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get events")
@@ -472,6 +479,7 @@ func (u *UniHandler) GetAllEvents(c echo.Context) error {
 // @Router       /universities/events [post]
 // @Security     BearerAuth
 func (u *UniHandler) CreateNewEvent(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[CreateNewEvent] CreateNewEvent called")
@@ -482,7 +490,7 @@ func (u *UniHandler) CreateNewEvent(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateNewEvent] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -500,7 +508,7 @@ func (u *UniHandler) CreateNewEvent(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
 	}
 
-	uniInfo, err := u.uniService.GetInfoAboutUni(context.TODO(), currentUser.ID)
+	uniInfo, err := u.uniService.GetInfoAboutUni(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateNewEvent] failed to get university info. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get university info")
@@ -535,7 +543,7 @@ func (u *UniHandler) CreateNewEvent(c echo.Context) error {
 		PhotoUrl:     req.PhotoUrl,
 	}
 
-	err = u.uniService.CreateNewEvent(context.TODO(), event)
+	err = u.uniService.CreateNewEvent(ctx, event)
 	if err != nil {
 		log.Errorf("[CreateNewEvent] failed to create event: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create event")

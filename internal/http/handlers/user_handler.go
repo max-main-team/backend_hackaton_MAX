@@ -46,14 +46,16 @@ func (u *UserHandler) GetUserInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
-	userInfo, err := u.userService.GetUser(context.TODO(), currentUser.ID)
+	ctx := c.Request().Context()
+
+	userInfo, err := u.userService.GetUser(ctx, currentUser.ID)
 
 	if err != nil {
 		log.Errorf("[GetUserInfo] Failed get user info: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed get user info")
 	}
 
-	userRoles, err := u.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	userRoles, err := u.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[GetUserInfo] Failed find user roles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")

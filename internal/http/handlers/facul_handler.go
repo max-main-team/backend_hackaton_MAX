@@ -40,8 +40,9 @@ func NewFaculHandler(faculService *services.FaculService, userService *services.
 // @Router       /admin/faculties [post]
 // @Security     BearerAuth
 func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
-
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
+
 	log.Print(context.Background(), "[CreateNewFaculty] CreateNewFaculty called")
 
 	var req dto.CreateNewFacultyRequest
@@ -57,7 +58,7 @@ func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
-	roles, err := f.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := f.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[CreateNewFaculty] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -75,7 +76,7 @@ func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
 	}
 
-	err = f.faculService.CreateNewFaculty(context.TODO(), req.Name, currentUser.ID)
+	err = f.faculService.CreateNewFaculty(ctx, req.Name, currentUser.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "failed create new faculty")
@@ -96,8 +97,9 @@ func (f *FaculHandler) CreateNewFaculty(c echo.Context) error {
 // @Router       /admin/faculties [get]
 // @Security     BearerAuth
 func (f *FaculHandler) GetFaculties(c echo.Context) error {
-
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
+
 	log.Print(context.Background(), "[GetFaculties] GetUniInfo called")
 
 	currentUser, ok := c.Get("user").(*models.User)
@@ -106,7 +108,7 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Authentication error")
 	}
 
-	roles, err := f.userService.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := f.userService.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[GetFaculties] fail to get user roles. err: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user roles")
@@ -124,7 +126,7 @@ func (f *FaculHandler) GetFaculties(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "permission denied. need role admin")
 	}
 
-	faculties, err := f.faculService.GetInfoAboutUni(context.TODO(), currentUser.ID)
+	faculties, err := f.faculService.GetInfoAboutUni(ctx, currentUser.ID)
 
 	if err != nil {
 		log.Errorf("[GetFaculties] failed get faculties. err: %v", err)

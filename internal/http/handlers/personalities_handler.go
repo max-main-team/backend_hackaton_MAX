@@ -44,6 +44,7 @@ func NewPersonalitiesHandler(personServ *services.PersonalitiesService, userServ
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /admin/personalities/access [post]
 func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[RequestAccess] RequestAccess called")
@@ -54,7 +55,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	// roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	// roles, err := h.userServ.GetUserRolesByID(ctx, currentUser.ID)
 	// if err != nil {
 	// 	log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
 	// 	return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
@@ -74,7 +75,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.personServ.SendAccessToAddInUniversity(context.TODO(), int64(currentUser.ID), request)
+	err := h.personServ.SendAccessToAddInUniversity(ctx, int64(currentUser.ID), request)
 	if err != nil {
 		log.Errorf("[RequestAccess] failed to send access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -97,6 +98,7 @@ func (h *PersonalitiesHandler) RequestAccess(c echo.Context) error {
 // @Router       /admin/personalities/access [delete]
 // @Security     BearerAuth
 func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[RejectRequestAccess] RejectRequestAccess called")
@@ -105,7 +107,7 @@ func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 		log.Errorf("[RejectRequestAccess] Authentication error. user not found in context")
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
-	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := h.userServ.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
@@ -130,7 +132,7 @@ func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request_id")
 	}
 
-	err = h.personServ.RejectRequest(context.TODO(), requestIDInt)
+	err = h.personServ.RejectRequest(ctx, requestIDInt)
 	if err != nil {
 		log.Errorf("[RejectRequestAccess] failed to reject request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to reject request")
@@ -154,6 +156,7 @@ func (h *PersonalitiesHandler) RejectRequestAccess(c echo.Context) error {
 // @Router       /admin/personalities/access [get]
 // @Security     BearerAuth
 func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 
 	log.Print(context.Background(), "[GetRequests] GetRequests called")
@@ -164,7 +167,7 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := h.userServ.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
@@ -202,7 +205,7 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 		offsetInt = 0
 	}
 
-	response, err := h.personServ.GetAccessRequest(context.TODO(), currentUser.ID, limitInt, offsetInt)
+	response, err := h.personServ.GetAccessRequest(ctx, currentUser.ID, limitInt, offsetInt)
 	if err != nil {
 		log.Errorf("[GetRequests] failed to get access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -229,6 +232,7 @@ func (h *PersonalitiesHandler) GetRequests(c echo.Context) error {
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /admin/personalities/access/accept [post]
 func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[AcceptRequest] AcceptRequest called")
 
@@ -238,7 +242,7 @@ func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	roles, err := h.userServ.GetUserRolesByID(context.TODO(), currentUser.ID)
+	roles, err := h.userServ.GetUserRolesByID(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[RequestAccess] GetUserRolesByID error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "user is not authenticated")
@@ -273,7 +277,7 @@ func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = h.personServ.AcceptAccess(context.TODO(), request)
+	err = h.personServ.AcceptAccess(ctx, request)
 	if err != nil {
 		log.Errorf("[AcceptRequest] failed to send access request: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -293,6 +297,7 @@ func (h *PersonalitiesHandler) AcceptAccess(c echo.Context) error {
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /personalities/universities [get]
 func (h *PersonalitiesHandler) GetAllUniversitiesForPerson(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[GetAllUniversitiesFromPerson] GetAllUniversitiesFromPerson called")
 
@@ -302,7 +307,7 @@ func (h *PersonalitiesHandler) GetAllUniversitiesForPerson(c echo.Context) error
 		return echo.NewHTTPError(http.StatusUnauthorized, "user is not authenticated")
 	}
 
-	universities, err := h.personServ.GetAllUniversitiesForPerson(context.TODO(), currentUser.ID)
+	universities, err := h.personServ.GetAllUniversitiesForPerson(ctx, currentUser.ID)
 	if err != nil {
 		log.Errorf("[GetAllUniversitiesFromPerson] failed to get all universities for person: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -334,6 +339,7 @@ func (h *PersonalitiesHandler) GetAllUniversitiesForPerson(c echo.Context) error
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /personalities/faculty [get]
 func (h *PersonalitiesHandler) GetAllFacultiesForUniversity(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[GetAllFacultiesForUniversity] GetAllFacultiesForUniversity called")
 
@@ -344,7 +350,7 @@ func (h *PersonalitiesHandler) GetAllFacultiesForUniversity(c echo.Context) erro
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	faculties, err := h.personServ.GetAllFacultiesForUniversity(context.TODO(), universityIDInt)
+	faculties, err := h.personServ.GetAllFacultiesForUniversity(ctx, universityIDInt)
 	if err != nil {
 		log.Errorf("[GetAllFacultiesForUniversity] failed to get all faculties for university: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -375,6 +381,7 @@ func (h *PersonalitiesHandler) GetAllFacultiesForUniversity(c echo.Context) erro
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /personalities/departments [get]
 func (h *PersonalitiesHandler) GetAllDepartmentsForFaculty(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[GetAllDepartmentsForFaculty] GetAllDepartmentsForFaculty called")
 
@@ -385,7 +392,7 @@ func (h *PersonalitiesHandler) GetAllDepartmentsForFaculty(c echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	departments, err := h.personServ.GetAllDepartmentsForFaculty(context.TODO(), facultyIDInt)
+	departments, err := h.personServ.GetAllDepartmentsForFaculty(ctx, facultyIDInt)
 	if err != nil {
 		log.Errorf("[GetAllDepartmentsForFaculty] failed to get all departments for faculty: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -416,6 +423,7 @@ func (h *PersonalitiesHandler) GetAllDepartmentsForFaculty(c echo.Context) error
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /personalities/groups [get]
 func (h *PersonalitiesHandler) GetAllGroupsForDepartment(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[GetAllGroupsForDepartment] GetAllGroupsForDepartment called")
 
@@ -426,7 +434,7 @@ func (h *PersonalitiesHandler) GetAllGroupsForDepartment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	groups, err := h.personServ.GetAllGroupsForDepartment(context.TODO(), departmentIDInt)
+	groups, err := h.personServ.GetAllGroupsForDepartment(ctx, departmentIDInt)
 	if err != nil {
 		log.Errorf("[GetAllGroupsForDepartment] failed to get all groups for department: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -458,6 +466,7 @@ func (h *PersonalitiesHandler) GetAllGroupsForDepartment(c echo.Context) error {
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /personalities/student [get]
 func (h *PersonalitiesHandler) GetAllStudentForGtoup(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[GetAllStudentForGtoup] GetAllStudentForGtoup called")
 
@@ -474,7 +483,7 @@ func (h *PersonalitiesHandler) GetAllStudentForGtoup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	students, err := h.personServ.GetAllStudentsForGroup(context.TODO(), groupIDInt)
+	students, err := h.personServ.GetAllStudentsForGroup(ctx, groupIDInt)
 	if err != nil {
 		log.Errorf("[GetAllStudentForGtoup] failed to get all students for group: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -516,6 +525,7 @@ func (h *PersonalitiesHandler) GetAllStudentForGtoup(c echo.Context) error {
 // @Failure      500   {object}  echo.HTTPError  "Internal server error"
 // @Router       /personalities/teachers [get]
 func (h *PersonalitiesHandler) GetAllTeachersForUniversity(c echo.Context) error {
+	ctx := c.Request().Context()
 	log := c.Get("logger").(embedlog.Logger)
 	log.Print(context.Background(), "[GetAllTeachersForUniversity] GetAllTeachersForUniversity called")
 
@@ -532,7 +542,7 @@ func (h *PersonalitiesHandler) GetAllTeachersForUniversity(c echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	teachers, err := h.personServ.GetAllTeachersForUniversity(context.TODO(), universityIDInt)
+	teachers, err := h.personServ.GetAllTeachersForUniversity(ctx, universityIDInt)
 	if err != nil {
 		log.Errorf("[GetAllTeachersForUniversity] failed to get all teachers for university: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

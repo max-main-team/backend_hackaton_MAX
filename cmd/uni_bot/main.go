@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	config "github.com/max-main-team/backend_hackaton_MAX/cfg"
@@ -60,6 +61,12 @@ func main() {
 		sl.Errorf("failed to parse pgx config: %v", err)
 		exitOnError(err)
 	}
+
+	// Настройка таймаутов для базы данных
+	poolCfg.ConnConfig.ConnectTimeout = 5 * time.Second // Таймаут подключения
+	poolCfg.MaxConnLifetime = 1 * time.Hour
+	poolCfg.MaxConnIdleTime = 30 * time.Minute
+	poolCfg.HealthCheckPeriod = 1 * time.Minute
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolCfg)
 	if err != nil {

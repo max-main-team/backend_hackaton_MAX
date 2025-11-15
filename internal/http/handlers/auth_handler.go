@@ -71,6 +71,7 @@ type RefreshRequest struct {
 // @Router       /auth/login [post]
 func (h *AuthHandler) Login(c echo.Context) error {
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
 
 	if err := c.Request().ParseForm(); err != nil {
 		log.Errorf("[Login] Failed to parse form: %v", err)
@@ -109,7 +110,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	var user *models.User
 
-	user, err := h.userRepo.GetUserByID(context.TODO(), int64(userData.ID))
+	user, err := h.userRepo.GetUserByID(ctx, int64(userData.ID))
 	if err != nil {
 		log.Errorf("[Login] Failed find user in db. err: %v", err)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -124,7 +125,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 				FullAvatarUrl: userData.PhotoURL,
 			}
 
-			err := h.userRepo.CreateNewUser(context.TODO(), newUser)
+			err := h.userRepo.CreateNewUser(ctx, newUser)
 			if err != nil {
 				log.Errorf("[Login] Failed to create new user. err: %v", err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create new user")
@@ -142,7 +143,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		user.AvatarUrl = userData.PhotoURL
 		user.FullAvatarUrl = userData.PhotoURL
 
-		err = h.userRepo.UpdateUser(context.TODO(), user)
+		err = h.userRepo.UpdateUser(ctx, user)
 		if err != nil {
 			log.Errorf("[Login] Failed to update user data. err: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update user data")
@@ -190,7 +191,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		Expires:  expires,
 	})
 
-	userRoles, err := h.userRepo.GetUserRolesByID(context.TODO(), user.ID)
+	userRoles, err := h.userRepo.GetUserRolesByID(ctx, user.ID)
 	if err != nil {
 		log.Errorf("[Login] Failed find user roles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed find user roles")
@@ -263,8 +264,8 @@ func (h *AuthHandler) validateMAXData(form url.Values, receivedHash string) bool
 // @Failure      500      {object}  echo.HTTPError      "Internal server error"
 // @Router       /auth/refresh [post]
 func (h *AuthHandler) Refresh(c echo.Context) error {
-
 	log := c.Get("logger").(embedlog.Logger)
+	ctx := c.Request().Context()
 
 	cookie, err := c.Cookie("refresh_token")
 	if err != nil {
@@ -288,7 +289,7 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Refresh token delete error")
 	}
 
-	user, err := h.userRepo.GetUserByID(context.TODO(), int64(rt.UserID))
+	user, err := h.userRepo.GetUserByID(ctx, int64(rt.UserID))
 	if err != nil {
 		log.Errorf("[Refresh] User lookup error: %d", rt.UserID)
 		return echo.NewHTTPError(http.StatusInternalServerError, "System error")

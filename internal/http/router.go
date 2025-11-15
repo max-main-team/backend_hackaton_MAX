@@ -1,7 +1,9 @@
 package http
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -21,6 +23,11 @@ func NewRouter(logger embedlog.Logger,
 	facultiesHandler *handlers.FaculHandler,
 	subjectsHandler *handlers.SubjectHandler) *echo.Echo {
 	e := echo.New()
+
+	// Настройка таймаутов HTTP сервера
+	e.Server.ReadTimeout = 15 * time.Second  // Таймаут чтения запроса
+	e.Server.WriteTimeout = 15 * time.Second // Таймаут записи ответа
+	e.Server.IdleTimeout = 120 * time.Second // Таймаут для idle соединений
 
 	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 	// 	Format: `[${time_rfc3339}] ${method} ${uri} ${status} ${latency_human} ` +
@@ -58,6 +65,21 @@ func NewRouter(logger embedlog.Logger,
 		ExposeHeaders:    []string{"Set-Cookie"},
 	}))
 
+	// Middleware для установки таймаута на каждый запрос
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// Устанавливаем таймаут 30 секунд для каждого запроса
+			ctx, cancel := context.WithTimeout(c.Request().Context(), 30*time.Second)
+			defer cancel()
+
+			// Заменяем контекст в запросе
+			c.SetRequest(c.Request().WithContext(ctx))
+
+			return next(c)
+		}
+	})
+
+	// Middleware для логгера
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Set("logger", logger)
